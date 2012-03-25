@@ -3,8 +3,9 @@ from flask import jsonify, render_template, redirect
 from flask import request
 app = Flask(__name__)
 
-import os
+import os, sys
 import json
+import getopt
 
 
 from reposadolib import reposadocommon
@@ -119,5 +120,22 @@ def process_queue():
     
     return jsonify(result=True);
 
+def main():
+	optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
+
+	flaskargs = {}
+	flaskargs['host'] = '0.0.0.0'
+	flaskargs['port'] = 8089
+	
+	for o, a in optlist:
+		if o == '-d':
+			flaskargs['debug'] = True
+		elif o == '-b':
+			flaskargs['host'] = a
+		elif o == '-p':
+			flaskargs['port'] = int(a)
+	
+	app.run(**flaskargs)
+
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    main()
