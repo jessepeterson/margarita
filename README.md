@@ -24,7 +24,7 @@ Or
 
 If you prefer to install into a Python virtualenv, that works as well.
 
-**JSON**
+**JSON (for Python installations older than 2.6)**
 
 Note also that Margarita uses JSON for it's Ajax queries. If running an older version of Python (say, version 2.5 on a stock Mac OS X 10.5 computer), then one will also have to install simplejson:
 
