@@ -24,13 +24,20 @@ Or
 
 If you prefer to install into a Python virtualenv, that works as well.
 
+**JSON**
+
+Note also that Margarita uses JSON for it's Ajax queries. If running an older version of Python (say, version 2.5 on a stock Mac OS X 10.5 computer), then one will also have to install simplejson:
+
+    easy_install simplejson
+
 Installation
 ------------
 
 1. Get Margarita source into a directory. Clone the repository or download and extract the files.
 2. Change directory into this location.
-3. Create a symlink to the reposado configuration file. On a Mac OS X system this would look like this:
+3. Create a symlink to the reposado configuration file. On a Mac OS X default system with reposado installed to the system root the preference file is in /usr/local/bin.
 
+Create symlink:
 
     ln -s /usr/local/bin/preferences.plist .
 
@@ -42,6 +49,8 @@ Usage
 Once the requirements and installation are taken care of one may simply launch the margarita.py:
 
     python margarita.py
+
+**Note:** Margarita must have permission to the reposado repository in order to effect any changes.
 
 This will launch a Flask web server hosting the project. Visit the web page at the listened address, by default the host's IP address on port 8089. To change those defaults:
 

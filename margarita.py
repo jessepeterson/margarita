@@ -4,9 +4,13 @@ from flask import request
 app = Flask(__name__)
 
 import os, sys
-import json
+try:
+	import json
+except ImportError:
+	# couldn't find json, try simplejson library
+	import simplejson as json
 import getopt
-
+from operator import itemgetter
 
 from reposadolib import reposadocommon
 
@@ -22,20 +26,22 @@ def list_branches():
 
 @app.route('/products', methods=['POST'])
 def products():
-    products = reposadocommon.getProductInfo()
-    prodlist = []
-    for prodid in products.keys():
-	prodlist.append({
-	    'title':    products[prodid]['title'],
-	    'version':  products[prodid]['version'],
-	    'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
-	    'id':       prodid,
-	    })
-    
-    from operator import itemgetter
-    sprodlist = sorted(prodlist, key=itemgetter('PostDate'), reverse=True)
+	products = reposadocommon.getProductInfo()
+	prodlist = []
+	for prodid in products.keys():
+		if 'title' in products[prodid] and 'version' in products[prodid] and 'PostDate' in products[prodid]:
+			prodlist.append({
+			    'title':    products[prodid]['title'],
+			    'version':  products[prodid]['version'],
+			    'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
+			    'id':       prodid,
+			    })
+		else:
+			print 'Invalid update!'
 
-    return jsonify(result=sprodlist)
+	sprodlist = sorted(prodlist, key=itemgetter('PostDate'), reverse=True)
+
+	return jsonify(result=sprodlist)
 
 @app.route('/new_branch/<branchname>', methods=['POST'])
 def new_branch(branchname):
