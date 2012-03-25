@@ -1,14 +1,14 @@
 Margarita
 =========
 
-Margarita is web front-end to reposado the Apple Software Update replication and catalog management tool. While the command line administration tools work great for folks who are comfortable in that environment it may not be so for others.
+Margarita is web front-end to [reposado](http://github.com/wdas/reposado) the Apple Software Update replication and catalog management tool. While the command line administration tools work great for folks who are comfortable in that environment it may not be so for others.
 
 Margarita attempts to be an easy to use and quick interface to list or de-list update products in branch catalogs per the usual reposado catalog management concepts.
 
 Requirements
 ------------
 
-Margarita is based on reposado and Flask. Some of these need to be installed for Margarita to work correctly.
+Margarita is based on reposado and [Flask](http://flask.pocoo.org/). Some of these need to be installed for Margarita to work correctly.
 
 **reposado**
 
@@ -30,6 +30,7 @@ Installation
 1. Get Margarita source into a directory. Clone the repository or download and extract the files.
 2. Change directory into this location.
 3. Create a symlink to the reposado configuration file. On a Mac OS X system this would look like this:
+
 
     ln -s /usr/local/bin/preferences.plist .
 
