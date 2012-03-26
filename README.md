@@ -1,7 +1,7 @@
 Margarita
 =========
 
-Margarita is web front-end to [reposado](http://github.com/wdas/reposado) the Apple Software Update replication and catalog management tool. While the command line administration tools work great for folks who are comfortable in that environment it may not be so for others.
+Margarita is a web front-end to [reposado](http://github.com/wdas/reposado) the Apple Software Update replication and catalog management tool. While the command line administration tools work great for folks who are comfortable in that environment it may not be so for others.
 
 Margarita attempts to be an easy to use and quick interface to list or de-list update products in branch catalogs per the usual reposado catalog management concepts.
 
@@ -26,7 +26,7 @@ If you prefer to install into a Python virtualenv, that works as well.
 
 **JSON (for Python installations older than 2.6)**
 
-Note also that Margarita uses JSON for it's Ajax queries. If running an older version of Python (say, version 2.5 on a stock Mac OS X 10.5 computer), then one will also have to install simplejson:
+Note also that Margarita uses the json library for it's Ajax queries. If running an older version of Python (say, version 2.5 on a stock Mac OS X 10.5 computer), then one will also have to install simplejson:
 
     easy_install simplejson
 
