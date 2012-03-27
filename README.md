@@ -14,6 +14,8 @@ Margarita is based on reposado and [Flask](http://flask.pocoo.org/). Some of the
 
 See the [reposado](http://github.com/wdas/reposado) project for how to install and prepare it. It needs to be setup and configured with at least Apple's catalogs synced.
 
+__Note__: Reposado may either be installed via setup.py/setuptools or simply run from the code files (either by download/extracting the files or by cloning the repository, etc.). Running from the code files is the documented way to run reposado. It is important to know in which way reposado is installed as Margarita needs to reference the location of the reposado library files. See below on installation for details on setting up. Thanks to timsutton on issue #1 for pointing this out.
+
 **Flask**
 
     easy_install flask
@@ -35,13 +37,17 @@ Installation
 
 1. Get Margarita source into a directory. Clone the repository or download and extract the files.
 2. Change directory into this location.
-3. Create a symlink to the reposado configuration file. On a Mac OS X default system with reposado installed to the system root the preference file is in /usr/local/bin.
+3. If reposado is running from code per the documented installation instructions (and not installed into site-packages via easy_install/setup.py) then one needs to create a symlink to the reposadolib directory in order for Margarita to find the reposado.
+4. Create a symlink to the reposado configuration file. On a Mac OS X default system with reposado installed to the system root the preference file is in /usr/local/bin, but may be where reposado is executing from. This is due the the fact that the reposado libraries reference the config file from the executing script's directory.
 
-Create symlink:
+Create symlinks:
+
+    cd /path/to/margaraita-install
+
+    ln -s /path/to/reposado-git-clone/code/reposadolib .
 
     ln -s /usr/local/bin/preferences.plist .
 
-This is due the the fact that the reposado libraries reference the config file from the executing script's directory.
 
 Usage
 -----
@@ -50,7 +56,9 @@ Once the requirements and installation are taken care of one may simply launch t
 
     python margarita.py
 
-**Note:** Margarita must have permission to the reposado repository in order to effect any changes.
+**Note:** Margarita must have permission to the reposado repository in order to effect any changes. This may mean you need to run margarita as a different user:
+
+    sudo -u _www python margarita.py
 
 This will launch a Flask web server hosting the project. Visit the web page at the listened address, by default the host's IP address on port 8089. To change those defaults:
 
