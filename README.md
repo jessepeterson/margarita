@@ -65,4 +65,15 @@ This will launch a Flask web server hosting the project. Visit the web page at t
 
     python margarita.py -p 5000 -b 192.168.1.2 -d
 
-Which would listen on port 5000, bind to IP 192.168.1.2, and enable debug mode.
+Which would listen on port 5000, bind to IP 192.168.1.2 (by default it listens on all interfaces and IP addresses), and enable debug mode.
+
+Automatic Startup
+-----------------
+
+**launchd**
+
+Margarita can be started automatically as part of launchd. Included is a launchd.plist file (originally supllied by stazeii in issue #2 - thanks!). It may need to be modified to fit your environment, installation locations, user specifications, etc.
+
+1. Copy plist file to ```/Library/LaunchDaemons/```
+2. Modify the plist to specify installation directory (namely the second item of the ProgramArguments key) and any other locations or modifications.
+3. Start up the plist file ```sudo launchctl load -w /Library/LaunchDaemons/com.github.jessepeterson.margarita.plist```
