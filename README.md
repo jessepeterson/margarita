@@ -8,7 +8,7 @@ Margarita attempts to be an easy to use and quick interface to list or de-list u
 Requirements
 ------------
 
-Margarita is based on reposado and [Flask](http://flask.pocoo.org/). Some of these need to be installed for Margarita to work correctly.
+Margarita is based on reposado and [Flask](http://flask.pocoo.org/) - a Python web framework. Some of these need to be installed for Margarita to work correctly.
 
 **reposado**
 
@@ -44,6 +44,7 @@ Create symlinks:
 
     cd /path/to/margaraita-install
 
+    # optional depending on reposado installation
     ln -s /path/to/reposado-git-clone/code/reposadolib .
 
     ln -s /usr/local/bin/preferences.plist .
