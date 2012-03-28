@@ -35,6 +35,7 @@ def products():
 			    'version':  products[prodid]['version'],
 			    'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
 			    'id':       prodid,
+			    'depr':     len(products[prodid].get('AppleCatalogs', [])) < 1,
 			    })
 		else:
 			print 'Invalid update!'

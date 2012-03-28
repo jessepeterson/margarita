@@ -186,13 +186,18 @@ function refresh_updates_rows() {
 	// loop through products and create rows
 	$.each(products['result'], function(row, product) {
 
-	    var text = '';
-	    
 	    var unlistedProducts = false;
 	    
+	    var text = '<tr><td>';
+
 	    // main informational columns
-	    text += '<tr><td>' +
-		product['title'] + '</td><td>' +
+	    text += product['title'];
+
+	    if (product['depr'] == true) {
+	        text += ' <span class="label label-warning">Deprecated</span>';
+	    }
+
+	    text += '</td><td>' +
 		product['version'] + '</td><td>' +
 		product['PostDate'] + '</td>';
 
@@ -200,8 +205,13 @@ function refresh_updates_rows() {
 	     * this is just for show as we cannot unlist raw catalog
 	     * updates.
 	     */
+	    if (product['depr'] == true) {
+	    text += '<td><button disabled class="btn btn-mini disabled">' +
+		'<i class="icon-remove icon-white"></i> Unlisted</button></td>';
+	    } else {
 	    text += '<td><button disabled class="btn btn-mini btn-primary disabled">' +
 		'<i class="icon-ok icon-white"></i> Listed</button></td>';
+	    }
 
 	    // loop through branches
 	    $.each(branches, function(branch) {
@@ -229,7 +239,7 @@ function refresh_updates_rows() {
 	    text += '</td></tr>';
 	    
 	    // hide commonly listed items to save space
-	    if (unlistedProducts || (hideCommonlyListed == false)) {
+	    if (unlistedProducts || (hideCommonlyListed == false) || (product['depr'] == true)) {
 		allrowtext += text;
 	    }
 	});
