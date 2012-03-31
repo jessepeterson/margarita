@@ -49,9 +49,22 @@ function add_all(branchname) {
 
 
 function branch_header_cell(branchname) {
-    return '<th class="branchcolumn">' +
-	'<i class="icon-list"></i> <span>' + branchname + ' branch</span>' +
-	'</th>';
+	var t = '<th class="branchcolumn">';
+
+	t += '<div class="btn-group">';
+	t += '<button class="btn dropdown-toggle" data-toggle="dropdown" href="#">';
+	t += branchname + ' branch <span class="caret"></span>';
+	t += '</button>';
+	t += '<ul class="dropdown-menu">';
+	t += '<li><a href="#" onclick="add_all(' + "'" + branchname + "'" + ');"><i class="icon icon-plus"></i> Add all products</a></li>';
+	t += '<li class="divider"></li>';
+	t += '<li><a style="color:#c00;" href="#" onclick="delete_branch(' + "'" + branchname + "'" + ');"><i class="icon icon-remove"></i> Delete branch</a></li>';
+	t += '</ul>';
+	t += '</div>';
+
+	t += '</th>';
+	
+	return t;
 }
 
 function refresh_updates_table() {
@@ -69,7 +82,7 @@ function refresh_updates_table() {
 	$("th.branchcolumn").remove();
 
 	// loop through branches and create columns
-	var text = branch_header_cell('direct');
+	var text = '<th class="branchcolumn">Apple branch</th>'; // branch_header_cell('direct');
 	$.each(branches, function(branch) {
 	    text += branch_header_cell(branch);
 	});
@@ -255,24 +268,6 @@ function refresh_updates_rows() {
 	    function(e) { hover_listed(this, 'out'); }
 	);
 
-	if (branchct > 0) {
-		// add all button
-	    text = '<tr><td colspan="4"></td>';
-	    $.each(branches, function(branch) {
-		text += '<td><button class="btn btn-mini btn-info" ' +
-		    'onclick="add_all(' + "'" + branch + "'" + ');">Add all to ' + branch + ' branch</button></td>';
-	    });
-	    $("#swupdates").append(text + '</td>');
-
-		// delete button
-	    text = '<tr><td colspan="4"></td>';
-	    $.each(branches, function(branch) {
-		text += '<td><button class="btn btn-mini btn-danger" ' +
-		    'onclick="delete_branch(' + "'" + branch + "'" + ');">Delete ' + branch + ' branch</button></td>';
-	    });
-	    $("#swupdates").append(text + '</td>');
-	}
-	
     }, 'json');
 }
 
