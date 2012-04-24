@@ -75,7 +75,7 @@ function refresh_updates_table() {
     $("#swupdates").empty();
 
     // retrive list of branches
-    $.post("/list_branches", function(data) {
+    $.get("/list_branches", function(data) {
 	branches = data['result'];
 
 	// remove existing branch table columns
@@ -192,7 +192,7 @@ function toggle_queue_listing(e, prodid, branch) {
 function refresh_updates_rows() {
     // existing rows should not exist
 
-    $.post("/products", function(products) {
+    $.get("/products", function(products) {
 
 	var allrowtext = '';
 
