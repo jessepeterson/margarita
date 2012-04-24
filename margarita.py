@@ -18,13 +18,13 @@ from reposadolib import reposadocommon
 def index():
     return render_template('margarita.html')
 
-@app.route('/list_branches', methods=['POST'])
+@app.route('/list_branches', methods=['GET'])
 def list_branches():
     '''Returns catalog branch names'''
     catalog_branches = reposadocommon.getCatalogBranches()
     return jsonify(result=catalog_branches)
 
-@app.route('/products', methods=['POST'])
+@app.route('/products', methods=['GET'])
 def products():
 	products = reposadocommon.getProductInfo()
 	prodlist = []
