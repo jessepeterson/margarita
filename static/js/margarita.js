@@ -36,13 +36,13 @@ function update_queue_items()
 }
 
 function delete_branch(branchname) {
-    $.post("/delete_branch/" + branchname, function() {
+    $.post("delete_branch/" + branchname, function() {
 	    refresh_updates_table();
     }, 'json');
 }
 
 function add_all(branchname) {
-    $.post("/add_all/" + branchname, function() {
+    $.post("add_all/" + branchname, function() {
 	    refresh_updates_table();
     }, 'json');
 }
@@ -75,7 +75,7 @@ function refresh_updates_table() {
     $("#swupdates").empty();
 
     // retrive list of branches
-    $.get("/list_branches", function(data) {
+    $.get("list_branches", function(data) {
 	branches = data['result'];
 
 	// remove existing branch table columns
@@ -192,7 +192,7 @@ function toggle_queue_listing(e, prodid, branch) {
 function refresh_updates_rows() {
     // existing rows should not exist
 
-    $.get("/products", function(products) {
+    $.get("products", function(products) {
 
 	var allrowtext = '';
 
@@ -275,7 +275,7 @@ function submit_queue() {
     if ($.active == 0 && queue_count() > 0) {
 		var cached_queue = listing_queue;
 		reset_queue();
-		$.post("/process_queue", {'queue': JSON.stringify(cached_queue)}, function(data) {
+		$.post("process_queue", {'queue': JSON.stringify(cached_queue)}, function(data) {
 		    refresh_updates_table();
 		});
     }
