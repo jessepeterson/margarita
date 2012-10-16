@@ -60,35 +60,29 @@ $(document).ready(function(){
 </head>
 <body>
 
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <span class="brand">Margarita</span>
-          <div class="nav-collapse">
-            <ul class="nav">
-	      <li><a href="#submitQueue" onClick="submit_queue();">Apply queued changes <span id="queueCount" class="badge badge-inverse">0</span></a></li>
-			<li><a id="toggleHide" href="#toggleHide"><i class="icon-white icon-ok"></i> <span>Hide commonly listed updates</span></a></li>
-<!--              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-	      -->
-	      
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
-    </div>
+
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<div class="container">
+			<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</a>
+
+			<span class="brand">Margarita</span>
+
+			<div class="nav-collapse">
+				<ul class="nav">
+					<li><a href="#submitQueue" onClick="submit_queue();">Apply queued changes <span id="queueCount" class="badge badge-inverse">0</span></a></li>
+					<li><a id="toggleHide" href="#toggleHide"><i class="icon-white icon-ok"></i> <span>Hide commonly listed updates</span></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
 
     <div class="container">
-
-<!--
-<button id="refbtn" class="btn">Refresh</button>
-  -->
 
 <table class="table table-striped">
     <thead>
@@ -106,7 +100,6 @@ $(document).ready(function(){
 </div>
 
 <div style="text-align:right;" class="well form-inline">
-
   <input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
   <button id="newbranchbtn" class="btn btn-primary">Create New Branch</button>
 </div>
