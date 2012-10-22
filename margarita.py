@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import jsonify, render_template, redirect
-from flask import request
+from flask import request, Response
 app = Flask(__name__)
 
 import os, sys
@@ -42,7 +42,11 @@ def products():
 
 	sprodlist = sorted(prodlist, key=itemgetter('PostDate'), reverse=True)
 
-	return jsonify(result=sprodlist)
+	js = json.dumps(sprodlist)
+	resp = Response(js, status=200, mimetype='application/json')
+	return resp
+
+	#return jsonify(result=sprodlist)
 
 @app.route('/new_branch/<branchname>', methods=['POST'])
 def new_branch(branchname):

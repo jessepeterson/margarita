@@ -58,6 +58,22 @@ $(document).ready(function(){
 */
     
 
+	var ASWUPDProduct = Backbone.Model.extend({
+		defaults: {
+			depr: false,
+			PostDate: null,
+			id: null,
+			title: null,
+		}
+	});
+
+	var ASWUPDProductCollection = Backbone.Collection.extend({
+		model: ASWUPDProduct,
+		url: 'products',
+	})
+
+	products = new ASWUPDProductCollection();
+	products.fetch();
 
 	var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 		tagName: 'a',
