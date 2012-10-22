@@ -19,6 +19,7 @@
 	<script>
 $(document).ready(function(){
 
+/*
     $('#newbranchbtn').click(function() {
 	var branchname = $('#branchname').val();
 	$.post("new_branch/" + branchname, function() {
@@ -54,13 +55,61 @@ $(document).ready(function(){
 			refresh_updates_table();
 		}
 	});
+*/
     
+
+
+	var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
+		tagName: 'a',
+		attributes: {
+			'href': '#',
+			'onClick': 'submit_queue();',
+		},
+		template: "#queuedChangesBtnViewTpl"
+	});
+
+	var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
+		tagName: 'a',
+		attributes: {
+			'id': 'toggleHide',
+			'href': '#toggleHide'
+		},
+		template: '#toggleHideCommonBtnViewTpl',
+	});
+
+	var NavbarLayout = Backbone.Marionette.Layout.extend({
+		template: "#navbarLayout",
+
+		regions: {
+			queuedChangesButton: "#queuedChangesButtonViewRegion",
+			toggleHideCommonButton: "#toggleHideCommonButtonViewRegion"
+		}
+	});
+
+
+	MargaritaApp = new Backbone.Marionette.Application();
+
+	MargaritaApp.addRegions({
+		navbarRegion: "#navbarRegion"
+	});
+
+	MargaritaApp.addInitializer(function() {
+		navbar = new NavbarLayout();
+		MargaritaApp.navbarRegion.show(navbar);
+		navbar.queuedChangesButton.show(new QueuedChangesButtonView());
+		navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView());
+	});
+
+
+	MargaritaApp.start();
 });
 	</script>
 </head>
 <body>
 
+<div id="navbarRegion"></div>
 
+<script id="navbarLayout" type="text/html">
 <div class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
 		<div class="container">
@@ -74,15 +123,26 @@ $(document).ready(function(){
 
 			<div class="nav-collapse">
 				<ul class="nav">
-					<li><a href="#submitQueue" onClick="submit_queue();">Apply queued changes <span id="queueCount" class="badge badge-inverse">0</span></a></li>
-					<li><a id="toggleHide" href="#toggleHide"><i class="icon-white icon-ok"></i> <span>Hide commonly listed updates</span></a></li>
+					<li id="queuedChangesButtonViewRegion"></li>
+					<li id="toggleHideCommonButtonViewRegion"></li>
 				</ul>
 			</div>
 		</div>
 	</div>
 </div>
+</script>
 
-    <div class="container">
+<script id="queuedChangesBtnViewTpl" type="text/html">
+<span>Apply queued changes <span id="queueCount" class="badge badge-inverse">0</span></span>
+</script>
+
+<script id="toggleHideCommonBtnViewTpl" type="text/html">
+<i class="icon-white icon-ok"></i> <span>Hide commonly listed updates</span>
+</script>
+
+
+
+<div class="container">
 
 <table class="table table-striped">
     <thead>
