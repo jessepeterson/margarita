@@ -120,6 +120,11 @@ $(document).ready(function(){
 		}
 	});
 
+	var ProgressBarView = Backbone.Marionette.ItemView.extend({
+		className: 'span12',
+		template: '#span12-progress-bar',
+	});
+
 	//////////////////
 
 	MargaritaApp = new Backbone.Marionette.Application();
@@ -132,8 +137,12 @@ $(document).ready(function(){
 	MargaritaApp.addInitializer(function() {
 		navbar = new NavbarLayout();
 		MargaritaApp.navbarRegion.show(navbar);
+
+		// XXX: defer until updates loaded (to prevent modifications)?
 		navbar.queuedChangesButton.show(new QueuedChangesButtonView());
 		navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView());
+
+		MargaritaApp.updates.show(new ProgressBarView());
 
 		products = new ASWUPDProductCollection();
 		products.fetch({
@@ -197,19 +206,22 @@ $(document).ready(function(){
 <tbody></tbody>
 </script>
 
+<script id="span12-progress-bar" type="text/html">
+<div class="progress progress-striped active">
+	<div class="bar" style="width: 100%;"></div>
+</div>
+</script>
+
 <script id="update-row" type="text/template">
 <td><%= title %></td>
 <td><%= version %></td>
 <td><%= PostDate %></td>
 </script>
 
-<div id="updates"></div>
-
 <div class="container">
+	<div id="updates"></div>
 
-<div id="progressBar" style="text-align:center;padding:1em;">
-    <img src="static/img/ajax-loader.gif" title="Progress bar loader" />
-</div>
+	<hr></hr>
 
 <div style="text-align:right;" class="well form-inline">
   <input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
