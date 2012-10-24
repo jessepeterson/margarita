@@ -59,21 +59,21 @@ $(document).ready(function(){
     
 
 	var ASWUPDProduct = Backbone.Model.extend({
-		defaults: {
+/*		defaults: {
 			depr: false,
 			PostDate: null,
 			id: null,
+			version: null,
 			title: null,
 		}
-	});
+*/	});
 
 	var ASWUPDProductCollection = Backbone.Collection.extend({
 		model: ASWUPDProduct,
 		url: 'products',
 	})
 
-	products = new ASWUPDProductCollection();
-	products.fetch();
+	//////////////
 
 	var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 		tagName: 'a',
@@ -102,11 +102,31 @@ $(document).ready(function(){
 		}
 	});
 
+	//////////////////
+
+	var UpdateView = Backbone.Marionette.ItemView.extend({
+		tagName: 'tr',
+		template: '#update-row',
+	});
+
+	var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
+		tagName: 'table',
+		className: 'table table-striped',
+		template: '#update-table',
+		itemView: UpdateView,
+
+		appendHtml: function(collectionView, itemView) {
+			collectionView.$("tbody").append(itemView.el);
+		}
+	});
+
+	//////////////////
 
 	MargaritaApp = new Backbone.Marionette.Application();
 
 	MargaritaApp.addRegions({
-		navbarRegion: "#navbarRegion"
+		navbarRegion: "#navbarRegion",
+		updates: '#updates',
 	});
 
 	MargaritaApp.addInitializer(function() {
@@ -114,6 +134,16 @@ $(document).ready(function(){
 		MargaritaApp.navbarRegion.show(navbar);
 		navbar.queuedChangesButton.show(new QueuedChangesButtonView());
 		navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView());
+
+		products = new ASWUPDProductCollection();
+		products.fetch({
+			success: function(col) {
+				var updateTableView = new UpdatesTableView({collection: col});
+				MargaritaApp.updates.show(updateTableView);
+			}
+		});
+
+
 	});
 
 
@@ -156,20 +186,26 @@ $(document).ready(function(){
 <i class="icon-white icon-ok"></i> <span>Hide commonly listed updates</span>
 </script>
 
+<script id="update-table" type="text/html">
+<thead>
+<tr>
+	<th>Software Update Product</th>
+	<th>Version</th>
+	<th>Post Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</script>
 
+<script id="update-row" type="text/template">
+<td><%= title %></td>
+<td><%= version %></td>
+<td><%= PostDate %></td>
+</script>
+
+<div id="updates"></div>
 
 <div class="container">
-
-<table class="table table-striped">
-    <thead>
-	<tr id="swupdatecols">
-	    <th>Software Update Product</th>
-	    <th>Version</th>
-	    <th>Post Date</th>
-	</tr>
-    </thead>
-    <tbody id="swupdates"></tbody>
-</table>
 
 <div id="progressBar" style="text-align:center;padding:1em;">
     <img src="static/img/ajax-loader.gif" title="Progress bar loader" />
@@ -180,7 +216,7 @@ $(document).ready(function(){
   <button id="newbranchbtn" class="btn btn-primary">Create New Branch</button>
 </div>
 
-	</div>
+</div>
 
 	<script src="static/js/underscore-min.js"></script>
 	<script src="static/js/backbone-min.js"></script>
