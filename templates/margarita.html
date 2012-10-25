@@ -201,6 +201,7 @@ $(document).ready(function(){
 	<th>Software Update Product</th>
 	<th>Version</th>
 	<th>Post Date</th>
+	<th>Apple branch</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -213,9 +214,20 @@ $(document).ready(function(){
 </script>
 
 <script id="update-row" type="text/template">
-<td><%= title %></td>
+<td><%= title %><% if (depr) { %> <span class="label label-warning">Deprecated</span><% } %></td>
 <td><%= version %></td>
 <td><%= PostDate %></td>
+<td>
+<% if (depr) { %>
+	<button disabled class="btn btn-mini disabled">
+		<i class="icon-remove icon-white"></i> Unlisted
+	</button>
+<% } else { %>
+	<button disabled class="btn btn-mini btn-primary disabled">
+		<i class="icon-ok icon-white"></i> Listed
+	</button>
+<% } %>
+</td>
 </script>
 
 <div class="container">
