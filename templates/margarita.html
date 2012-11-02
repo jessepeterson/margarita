@@ -75,6 +75,16 @@ $(document).ready(function(){
 
 	//////////////
 
+	var FilterCriteria = Backbone.Model.extend({
+		defaults: {
+			hideCommon: true,
+		}
+	});
+
+	filterCriteria = new FilterCriteria();
+
+	//////////////
+
 	var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 		tagName: 'a',
 		attributes: {
@@ -86,11 +96,17 @@ $(document).ready(function(){
 
 	var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
 		tagName: 'a',
-		attributes: {
-			'id': 'toggleHide',
-			'href': '#toggleHide'
+		events: {
+			'click': 'click',
 		},
 		template: '#toggleHideCommonBtnViewTpl',
+		initialize: function() {
+			this.model.bind('change', this.render, this);
+		},
+		click: function() {
+			// toggle the hide common flag
+			this.model.set('hideCommon', !this.model.get('hideCommon'));
+		},
 	});
 
 	var NavbarLayout = Backbone.Marionette.Layout.extend({
@@ -114,9 +130,13 @@ $(document).ready(function(){
 		className: 'table table-striped',
 		template: '#update-table',
 		itemView: UpdateView,
-
+		initialize: function() {
+			this.options.filterCriteria.bind('change', this.render, this);
+		},
 		appendHtml: function(collectionView, itemView) {
-			collectionView.$("tbody").append(itemView.el);
+			if (this.options.filterCriteria.get('hideCommon') == false || (this.options.filterCriteria.get('hideCommon') == true && itemView.model.get('depr') == true)) {
+				collectionView.$("tbody").append(itemView.el);
+			}
 		}
 	});
 
@@ -140,14 +160,17 @@ $(document).ready(function(){
 
 		// XXX: defer until updates loaded (to prevent modifications)?
 		navbar.queuedChangesButton.show(new QueuedChangesButtonView());
-		navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView());
+		navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: filterCriteria}));
 
 		MargaritaApp.updates.show(new ProgressBarView());
 
 		products = new ASWUPDProductCollection();
 		products.fetch({
 			success: function(col) {
-				var updateTableView = new UpdatesTableView({collection: col});
+				var updateTableView = new UpdatesTableView({
+					collection: col,
+					filterCriteria: filterCriteria
+				});
 				MargaritaApp.updates.show(updateTableView);
 			}
 		});
@@ -191,8 +214,8 @@ $(document).ready(function(){
 <span>Apply queued changes <span id="queueCount" class="badge badge-inverse">0</span></span>
 </script>
 
-<script id="toggleHideCommonBtnViewTpl" type="text/html">
-<i class="icon-white icon-ok"></i> <span>Hide commonly listed updates</span>
+<script id="toggleHideCommonBtnViewTpl" type="text/template">
+<i class="icon-white<% if (hideCommon) { %> icon-ok<% } %>"></i> <span>Hide commonly listed updates</span>
 </script>
 
 <script id="update-table" type="text/html">
