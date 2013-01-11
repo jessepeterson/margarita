@@ -66,12 +66,32 @@ $(document).ready(function(){
 			version: null,
 			title: null,
 		}
-*/	});
+*/	
+		initialize: function() {
+			if (!this.get('branches')) {
+				this.set({branches: new Array()});
+			}
+		}
+	});
 
 	var ASWUPDProductCollection = Backbone.Collection.extend({
 		model: ASWUPDProduct,
 		url: 'products',
+		initialize: function() {
+			this.bind('reset', this.loadBranches);
+		},
+		loadBranches: function() {
+			// to load branches and branch updates
+			console.log("after_reset: loadbranches!")
+		},
 	})
+
+	var Branch = Backbone.Model.extend({});
+
+	var BranchCollection = Backbone.Collection.extend({
+		model: Branch,
+		url: 'branches',
+	});
 
 	//////////////
 
@@ -154,24 +174,67 @@ $(document).ready(function(){
 		updates: '#updates',
 	});
 
+	var products = new ASWUPDProductCollection();
+	var branches = new BranchCollection();
+	var updateTableView = new UpdatesTableView({
+		collection: products,
+		filterCriteria: filterCriteria,
+	});
+
+	MargaritaApp.vent.on('updatedProducts', function() {
+		console.log("Updated products event triggered; showing update table");
+		MargaritaApp.updates.show(updateTableView);
+	});
+
 	MargaritaApp.addInitializer(function() {
 		navbar = new NavbarLayout();
 		MargaritaApp.navbarRegion.show(navbar);
 
-		// XXX: defer until updates loaded (to prevent modifications)?
+		// XXX: maybe defer until updates loaded (to prevent modifications)?
 		navbar.queuedChangesButton.show(new QueuedChangesButtonView());
 		navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: filterCriteria}));
 
 		MargaritaApp.updates.show(new ProgressBarView());
 
-		products = new ASWUPDProductCollection();
 		products.fetch({
-			success: function(col) {
-				var updateTableView = new UpdatesTableView({
-					collection: col,
-					filterCriteria: filterCriteria
+			success: function(prodCol) {
+				console.log("Products: " + prodCol.length.toString());
+
+				branches.fetch({
+					success: function(branchCol) {
+					console.log("Branches: " + branchCol.length.toString());
+
+						// loop through products
+						prodCol.each(function(prod) {
+							prodId = prod.get('id');
+
+							// loop through branches for this product
+							// assembling an array that looks like ["branch1",
+							// null, "branch2"] depending on product branch
+							// inclusion. Note that the order is important
+							// as the view columns are defined define by it
+							branchCol.each(function(branch) {
+								branchName = branch.get('name');
+								prodArr = branch.get('products');
+
+								prodBranches = prod.get('branches');
+								if (prodBranches == undefined) {
+									prodBranches = new Array();
+								}
+
+								if (prodArr.indexOf(prodId) != -1) {
+									prodBranches.push(branchName);
+								} else {
+									prodBranches.push(null);
+								}
+
+								prod.set('branches', prodBranches);
+							});
+						});
+
+						MargaritaApp.vent.trigger('updatedProducts');
+					},
 				});
-				MargaritaApp.updates.show(updateTableView);
 			}
 		});
 
@@ -237,7 +300,12 @@ $(document).ready(function(){
 </script>
 
 <script id="update-row" type="text/template">
-<td><%= title %><% if (depr) { %> <span class="label label-warning">Deprecated</span><% } %></td>
+<td>
+	<span title="Product ID: <%= id %>"><%= title %></span>
+	<% if (depr) { %>
+		<span class="label label-warning">Deprecated</span>
+	<% } %>
+</td>
 <td><%= version %></td>
 <td><%= PostDate %></td>
 <td>
@@ -251,6 +319,23 @@ $(document).ready(function(){
 	</button>
 <% } %>
 </td>
+
+<% _.each(branches, function(b) { %>
+
+<td>
+<% if (b) { %>
+	<button class="btn btn-mini btn-success">
+	<i class="icon-ok icon-white"></i> <span>Listed</span>
+	</button>
+<% } else { %>
+	<button class="btn btn-mini">
+	<i class="icon-remove"></i> <span>Unlisted</span>
+	</button>
+<% } %>
+</td>
+
+<% }) %>
+
 </script>
 
 <div class="container">

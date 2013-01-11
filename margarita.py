@@ -14,15 +14,25 @@ from operator import itemgetter
 
 from reposadolib import reposadocommon
 
+def json_response(r):
+	'''Glue for wrapping raw JSON responses'''
+	return Response(json.dumps(r), status=200, mimetype='application/json')
+
 @app.route('/')
 def index():
     return render_template('margarita.html')
 
-@app.route('/list_branches', methods=['GET'])
+@app.route('/branches', methods=['GET'])
 def list_branches():
-    '''Returns catalog branch names'''
-    catalog_branches = reposadocommon.getCatalogBranches()
-    return jsonify(result=catalog_branches)
+	'''Returns catalog branch names and associated updates'''
+	catalog_branches = reposadocommon.getCatalogBranches()
+
+	# reorganize the updates into an array of branches
+	branches = []
+	for branch in catalog_branches.keys():
+		branches.append({'name': branch, 'products': catalog_branches[branch]})
+
+	return json_response(branches)
 
 @app.route('/products', methods=['GET'])
 def products():
@@ -42,11 +52,7 @@ def products():
 
 	sprodlist = sorted(prodlist, key=itemgetter('PostDate'), reverse=True)
 
-	js = json.dumps(sprodlist)
-	resp = Response(js, status=200, mimetype='application/json')
-	return resp
-
-	#return jsonify(result=sprodlist)
+	return json_response(sprodlist)
 
 @app.route('/new_branch/<branchname>', methods=['POST'])
 def new_branch(branchname):
