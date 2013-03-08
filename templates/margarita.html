@@ -14,7 +14,6 @@
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <link href="static/css/bootstrap-responsive.min.css" rel="stylesheet">
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -28,7 +27,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
       -->
-    <script src="static/js/jquery-1.7.2.min.js"></script>
+    <script src="static/js/jquery-1.9.1.min.js"></script>
     <script src="static/js/margarita.js"></script>
 
     <script>
@@ -48,14 +47,14 @@ $(document).ready(function(){
 
     refresh_updates_table();
     
-	$('tbody#swupdates')
-	.ajaxStart(function() { $(this).hide(); })
-	.ajaxStop( function() { $(this).show(); })
+	$(document)
+	.ajaxStart(function() { $('tbody#swupdates').hide(); })
+	.ajaxStop( function() { $('tbody#swupdates').show(); })
 	;
 
-	$("div#progressBar")
-	.ajaxStart(function() { $(this).show(); })
-	.ajaxStop( function() { $(this).hide(); })
+	$(document)
+	.ajaxStart(function() { $('div#progressBar').show(); })
+	.ajaxStop( function() { $('div#progressBar').hide(); })
 	;
 
 	$('a#toggleHide').click(function() {
@@ -78,7 +77,7 @@ $(document).ready(function(){
 
   <body>
 
-    <div class="navbar navbar-fixed-top">
+    <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
