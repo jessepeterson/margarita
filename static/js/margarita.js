@@ -1,282 +1,151 @@
-var branches = {}
-var branchct = 0;
-var listing_queue = {"listing": {}, "delisting": {}};
-var hideCommonlyListed = true;
+/* Models */
 
-function queue_count() {
-    var totalCt = 0;
-    
-    for (var i in  listing_queue['listing']) {
-	totalCt += listing_queue['listing'][i].length;
-    }
+var Branches = Backbone.Collection.extend({
+	model: Backbone.Model,
+	url: 'branches'
+});
 
-    for (var i in  listing_queue['delisting']) {
-	totalCt += listing_queue['delisting'][i].length;
-    }
+var Products = Backbone.Collection.extend({
+	model: Backbone.Model,
+	url: 'products',
 
-    return totalCt;
-}
+	initialize: function() {
+		this.bind('reset', this.fetchBranches);
+	},
 
-function reset_queue() {
-    listing_queue = {"listing": {}, "delisting": {}};
-    update_queue_items();
-}
+	fetchBranches: function() {
+		console.log('Products: ' + this.length.toString());
 
-function update_queue_items()
-{
-    var totalCt = queue_count();
+		var this_products = this;
 
-    $("span#queueCount").html(totalCt);
+		$.ajax({ url: 'branches', dataType: 'json',	success: function(branches) {
 
-    if (totalCt > 0) {
-	$("span#queueCount").attr('class', 'badge badge-info');
-    } else {
-	$("span#queueCount").attr('class', 'badge badge-inverse');
-    }
-}
+			console.log('Branches: ' + branches.length.toString());
 
-function delete_branch(branchname) {
-    $.post("delete_branch/" + branchname, function() {
-	    refresh_updates_table();
-    }, 'json');
-}
+			this_products.each(function (prod) {
+				var prodid = prod.get('id');
+				var prodbranches = [];
 
-function add_all(branchname) {
-    $.post("add_all/" + branchname, function() {
-	    refresh_updates_table();
-    }, 'json');
-}
+				for (var bIdx = 0; bIdx < branches.length; bIdx++) {
+					if (_.indexOf(branches[bIdx].products, prodid) != -1)
+						prodbranches.push(branches[bIdx].name);
+					else
+						/* TODO: this is bad hack to distinguish table
+						   columns in the templates. would be better to
+						   be able to access the parent collection from
+						   the individual models to see how many branches
+						   we have. */
+						prodbranches.push(null);
+				}
 
+				prod.set('branches', prodbranches);
+			});
 
-function branch_header_cell(branchname) {
-	var t = '<th class="branchcolumn">';
-
-	t += '<div class="btn-group">';
-	t += '<button class="btn dropdown-toggle" data-toggle="dropdown" href="#">';
-	t += branchname + ' branch <span class="caret"></span>';
-	t += '</button>';
-	t += '<ul class="dropdown-menu">';
-	t += '<li><a href="#" onclick="add_all(' + "'" + branchname + "'" + ');"><i class="icon icon-plus"></i> Add all products</a></li>';
-	t += '<li class="divider"></li>';
-	t += '<li><a style="color:#c00;" href="#" onclick="delete_branch(' + "'" + branchname + "'" + ');"><i class="icon icon-remove"></i> Delete branch</a></li>';
-	t += '</ul>';
-	t += '</div>';
-
-	t += '</th>';
-	
-	return t;
-}
-
-function refresh_updates_table() {
-
-    reset_queue();
-
-    // remove existing data rows
-    $("#swupdates").empty();
-
-    // retrive list of branches
-    $.get("list_branches", function(data) {
-	branches = data['result'];
-
-	// remove existing branch table columns
-	$("th.branchcolumn").remove();
-
-	// loop through branches and create columns
-	var text = '<th class="branchcolumn">Apple branch</th>'; // branch_header_cell('direct');
-	$.each(branches, function(branch) {
-	    text += branch_header_cell(branch);
-	});
-	$("#swupdatecols").append(text);
-
-	// javascript seems to not have a standard way to count
-	// dictionaries, so do it ahead of time
-	branchct = 0;
-	for (var k in branches)
-	    branchct++;
-
-	// we can refresh the rows now
-	refresh_updates_rows();
-    }, 'json');
-    
-}
-
-function hover_unlisted(e, inout) {
-    if (inout == 'in' && $(e).hasClass('queued')) {
-	$("span", e).html('Dequeue listing');
-	$("i", e).attr("class", "icon-minus icon-white");
-    } else if (inout == 'in') {
-	$("span", e).html('Queue listing');
-	$("i", e).attr("class", "icon-plus");
-    } else if (inout == 'out' && $(e).hasClass('queued')) {
-	$("span", e).html('Listing queued');
-	$("i", e).attr("class", "icon-plus icon-white");
-    } else if (inout == 'out') {
-	$("span", e).html('Unlisted');
-	$("i", e).attr("class", "icon-remove");
-    }
-}
-
-function hover_listed(e, inout) {
-    if (inout == 'in' && $(e).hasClass('queued')) {
-	$("span", e).html('Dequeue delisting');
-	$("i", e).attr("class", "icon-minus icon-white");
-    } else if (inout == 'in') {
-	$("span", e).html('Queue delisting');
-	$("i", e).attr("class", "icon-minus icon-white");
-    } else if (inout == 'out' && $(e).hasClass('queued')) {
-	$("span", e).html('Delisting queued');
-	$("i", e).attr("class", "icon-minus icon-white");
-    } else if (inout == 'out') {
-	$("span", e).html('Listed');
-	$("i", e).attr("class", "icon-ok icon-white");
-    }
-}
-
-function toggle_queue_listing(e, prodid, branch) {
-
-    if ($(e).hasClass('listed')) {
-	var listing = 'delisting';
-    } else {
-	var listing = 'listing';
-    }
-
-    if (branch in listing_queue[listing]) {
-	// branch exists, let's toggle the prodid
-
-	var idx = listing_queue[listing][branch].indexOf(prodid);
-	if (idx != -1 ) {
-	    listing_queue[listing][branch].splice(idx, 1);
-
-	    $(e).removeClass('queued');
-
-	    if (listing == 'listing') {
-		$(e).removeClass('btn-info');
-		hover_unlisted(e, 'in');
-	    } else {
-		$(e).removeClass('btn-info');
-		$(e).addClass('btn-success');
-		hover_listed(e, 'in');
-	    }
-	} else {
-	    listing_queue[listing][branch].push(prodid);
-
-	    $(e).addClass('queued');
-	    if (listing == 'listing') {
-		$(e).addClass('btn-info');
-		hover_unlisted(e, 'in');
-	    } else {
-		$(e).removeClass('btn-success');
-		$(e).addClass('btn-info');
-		hover_listed(e, 'in');
-	    }
+			this_products.trigger("branchesLoaded");
+		}});
 	}
+});
 
-    } else {
-	// branch does not exist, create it with initial prodid
-	listing_queue[listing][branch] = [prodid];
-
-	$(e).addClass('queued');
-	if (listing == 'listing') {
-	    $(e).addClass('btn-info');
-	    hover_unlisted(e, 'in');
-	} else {
-	    $(e).removeClass('btn-success');
-	    $(e).addClass('btn-info');
-	    hover_listed(e, 'in');
+var FilterCriteria = Backbone.Model.extend({
+	defaults: {
+		hideCommon: true
 	}
-    }
+});
 
-    update_queue_items();
-}
+/* Views */
 
-function refresh_updates_rows() {
-    // existing rows should not exist
+var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
+	tagName: 'a',
+	attributes: { 'href': '#' },
+	template: "#queuedChangesBtnViewTpl"
+});
 
-    $.get("products", function(products) {
+var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
+	tagName: 'a',
+	events: { 'click': 'click' },
+	template: '#toggleHideCommonBtnViewTpl',
+	initialize: function() {
+		this.model.bind('change', this.render, this);
+	},
+	click: function() {
+		// toggle the hideCommon flag
+		this.model.set('hideCommon', !this.model.get('hideCommon'));
+	},
+});
 
-	var allrowtext = '';
+var NavbarLayout = Backbone.Marionette.Layout.extend({
+	template: "#navbarLayout",
 
-	// loop through products and create rows
-	$.each(products['result'], function(row, product) {
+	regions: {
+		queuedChangesButton:    "#queuedChangesButtonViewRegion",
+		toggleHideCommonButton: "#toggleHideCommonButtonViewRegion"
+	}
+});
 
-	    var unlistedProducts = false;
-	    
-	    var text = '<tr><td>';
+var UpdateView = Backbone.Marionette.ItemView.extend({
+	tagName: 'tr',
+	template: '#update-row',
+});
 
-	    // main informational columns
-	    text += product['title'];
-
-	    if (product['depr'] == true) {
-	        text += ' <span class="label label-warning">Deprecated</span>';
-	    }
-
-	    text += '</td><td>' +
-		product['version'] + '</td><td>' +
-		product['PostDate'] + '</td>';
-
-	    /* create the disabled indicator for the 'raw' catalogs
-	     * this is just for show as we cannot unlist raw catalog
-	     * updates.
-	     */
-	    if (product['depr'] == true) {
-	    text += '<td><button disabled class="btn btn-mini disabled">' +
-		'<i class="icon-remove icon-white"></i> Unlisted</button></td>';
-	    } else {
-	    text += '<td><button disabled class="btn btn-mini btn-primary disabled">' +
-		'<i class="icon-ok icon-white"></i> Listed</button></td>';
-	    }
-
-	    // loop through branches
-	    $.each(branches, function(branch) {
-		text += '<td>' +
-		    '<button class="btn btn-mini ';
-
-		// search for prodid in catalog product index
-		if (branches[branch].indexOf(product['id']) != -1) {
-		    text += 'listed btn-success" onClick="toggle_queue_listing(this,' + "'" +
-			product['id'] + "','" + 
-			branch + "'" + ');"' +
-			'><i class="icon-ok icon-white"></i> <span>Listed</span></button>';
-			'</td>';
-		} else {
-		    unlistedProducts = true;
-		    text += 'unlisted" onClick="toggle_queue_listing(this,' + "'" +
-			product['id'] + "','" + 
-			branch + "'" + ');"' +
-			'><i class="icon-remove"></i> <span>Unlisted</span></button>';
-			'</td>';
+var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
+	tagName: 'table',
+	className: 'table table-striped',
+	template: '#update-table',
+	itemView: UpdateView,
+	initialize: function() {
+		this.options.filterCriteria.bind('change', this.render, this);
+	},
+	appendHtml: function(collectionView, itemView) {
+		if (this.options.filterCriteria.get('hideCommon') == false || (this.options.filterCriteria.get('hideCommon') == true && itemView.model.get('depr') == true)) {
+			collectionView.$("tbody").append(itemView.el);
 		}
-		
-	    });
+	}
+});
 
-	    text += '</td></tr>';
-	    
-	    // hide commonly listed items to save space
-	    if (unlistedProducts || (hideCommonlyListed == false) || (product['depr'] == true)) {
-		allrowtext += text;
-	    }
-	});
-	$("#swupdates").append(allrowtext);
+var ProgressBarView = Backbone.Marionette.ItemView.extend({
+	// className: 'span4 offset4', // smaller progress bar
+	template: '#span12-progress-bar',
+});
 
-	// assign hover events for the new buttons
-	$('button.unlisted').hover(
-	    function(e) { hover_unlisted(this, 'in'); },
-	    function(e) { hover_unlisted(this, 'out'); }
-	);
-	$('button.listed').hover(
-	    function(e) { hover_listed(this, 'in'); },
-	    function(e) { hover_listed(this, 'out'); }
-	);
+/* Application */
 
-    }, 'json');
-}
+MargaritaApp = new Backbone.Marionette.Application();
 
-function submit_queue() {
-    if ($.active == 0 && queue_count() > 0) {
-		var cached_queue = listing_queue;
-		reset_queue();
-		$.post("process_queue", {'queue': JSON.stringify(cached_queue)}, function(data) {
-		    refresh_updates_table();
+MargaritaApp.addRegions({
+	navbarRegion: "#navbarRegion",
+	updates: '#updates',
+});
+
+MargaritaApp.addInitializer(function () {
+	console.log('Starting Margarita Marionette webapp');
+
+	var filterCriteria = new FilterCriteria();
+	var navbar = new NavbarLayout();
+
+	MargaritaApp.navbarRegion.show(navbar);
+
+	// XXX: maybe defer until updates loaded (to prevent modifications)?
+	navbar.queuedChangesButton.show(new QueuedChangesButtonView());
+	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: filterCriteria}));
+
+	MargaritaApp.updates.show(new ProgressBarView());
+
+	var products = new Products();
+
+	products.bind('branchesLoaded', function () {
+		var updateTableView = new UpdatesTableView({
+			collection: products,
+			filterCriteria: filterCriteria,
 		});
-    }
-}
+		MargaritaApp.updates.show(updateTableView);
+	});
+
+	products.fetch();
+
+});
+
+/* Init */
+
+$(document).ready(function () {
+	MargaritaApp.start();
+});
