@@ -26,6 +26,24 @@ Or
 
     pip install flask
 
+**BeautifulSoup**
+
+[BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/) in conjunction with the [lxml](http://lxml.de) XML and HTML parser are used to extract the description information from software updates and process it for display.
+
+    easy_install beautifulsoup4
+
+Or
+
+    pip install beautifulsoup4
+    
+**lxml**
+
+    easy_install lxml
+    
+Or
+
+	pip install lxml
+
 If you prefer to install into a Python virtualenv, that works as well.
 
 **JSON (for Python installations older than 2.6)**
