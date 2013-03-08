@@ -20,6 +20,17 @@
 
 <div id="navbarRegion"></div>
 
+<div class="container">
+
+	<div id="updates"></div>
+
+	<div style="text-align:right;" class="well form-inline">
+		<input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
+		<button id="newbranchbtn" class="btn btn-primary">Create New Branch</button>
+	</div>
+
+</div>
+
 <script id="navbarLayout" type="text/html">
 <div class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
@@ -107,17 +118,6 @@
 <% }) %>
 
 </script>
-
-<div class="container">
-
-<div id="updates"></div>
-
-<div style="text-align:right;" class="well form-inline">
-  <input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
-  <button id="newbranchbtn" class="btn btn-primary">Create New Branch</button>
-</div>
-
-</div>
 
 	<script src="static/js/underscore-min.js"></script>
 	<script src="static/js/backbone-min.js"></script>
