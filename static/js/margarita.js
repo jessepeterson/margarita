@@ -62,6 +62,7 @@ var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 
 var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
 	tagName: 'a',
+	attributes: { 'href': '#' },
 	events: { 'click': 'click' },
 	template: '#toggleHideCommonBtnViewTpl',
 	initialize: function() {
