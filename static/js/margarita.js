@@ -19,8 +19,14 @@ var Products = Backbone.Collection.extend({
 		var this_products = this;
 
 		$.ajax({ url: 'branches', dataType: 'json',	success: function(branches) {
+			var allbranches = []
 
-			console.log('Branches: ' + branches.length.toString());
+			for (var bIdx = 0; bIdx < branches.length; bIdx++)
+				allbranches.push(branches[bIdx].name);
+
+			this_products.branches = allbranches;
+
+			console.log('Branches: ' + branches.length.toString() + ' (' + allbranches.toString() + ')');
 
 			this_products.each(function (prod) {
 				var prodid = prod.get('id');
@@ -96,8 +102,40 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	initialize: function() {
 		this.options.filterCriteria.bind('change', this.render, this);
 	},
+	serializeData: function() {
+		// TODO: this is entirely dependent on Products::fetchBranches at the moment
+		var data = { branches: this.collection.branches };
+
+		return data;
+	},
 	appendHtml: function(collectionView, itemView) {
-		if (this.options.filterCriteria.get('hideCommon') == false || (this.options.filterCriteria.get('hideCommon') == true && itemView.model.get('depr') == true)) {
+		// yuck.. this function smells bad
+
+		var show = false;
+		var depr = itemView.model.get('depr');
+
+		if (this.options.filterCriteria.get('hideCommon') == false || depr == true) {
+			// always show the update if not hiding common updates OR
+			// if the update is deprecated
+			show = true;
+		} else {
+			var itemBranches = itemView.model.get('branches');
+
+			/* loop through list of branches. try to show those updates
+			   that are not commonly listed. that is: show all updates that
+			   are not listed in at least one branch, including apple's
+			   "branch" (e.g. not deprecated) */
+			var bTrack = (depr == false);
+			for (var bIdx=0; bIdx < itemBranches.length; bIdx++) {
+				if (bTrack != (itemBranches[bIdx] != null)) {
+					show = true;
+					break;
+				}
+				bTrack = itemBranches[bIdx] != null;
+			}
+		}
+
+		if (show == true) {
 			collectionView.$("tbody").append(itemView.el);
 		}
 	}

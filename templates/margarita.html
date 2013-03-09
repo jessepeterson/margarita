@@ -73,6 +73,10 @@
 	<th>Version</th>
 	<th>Post Date</th>
 	<th>Apple branch</th>
+
+	<% _.each(branches, function(b) { %>
+	<th><%= b %> branch</th>
+	<% }) %>
 </tr>
 </thead>
 <tbody></tbody>
