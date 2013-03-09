@@ -59,7 +59,7 @@
 </script>
 
 <script id="queuedChangesBtnViewTpl" type="text/html">
-<span>Apply queued changes <span id="queueCount" class="badge badge-inverse">0</span></span>
+<span>Apply queued changes <span id="queueCount" class="badge <% if (items.length > 0) { %>badge-info<% } else { %>badge-inverse<% } %>"><%= items.length %></span></span>
 </script>
 
 <script id="toggleHideCommonBtnViewTpl" type="text/template">

@@ -1,5 +1,9 @@
 /* Models */
 
+var ProductChanges = Backbone.Collection.extend({
+	model: Backbone.Model
+});
+
 var Branches = Backbone.Collection.extend({
 	model: Backbone.Model,
 	url: 'branches'
@@ -9,7 +13,9 @@ var Products = Backbone.Collection.extend({
 	model: Backbone.Model,
 	url: 'products',
 
-	initialize: function() {
+	initialize: function(models, productChanges) {
+		this.productChanges = productChanges || new ProductChanges();
+
 		this.bind('reset', this.fetchBranches);
 	},
 
@@ -64,7 +70,11 @@ var FilterCriteria = Backbone.Model.extend({
 var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 	tagName: 'a',
 	attributes: { 'href': '#' },
-	template: "#queuedChangesBtnViewTpl"
+	template: "#queuedChangesBtnViewTpl",
+	initialize: function() {
+		this.collection.bind('add', this.render, this);
+		this.collection.bind('remove', this.render, this);
+	}
 });
 
 var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
@@ -98,15 +108,20 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 		'click .button-unlisted': 'buttonUnlisted'
 	},
 	buttonListed: function (ev) {
-		console.log('listed ' + $(ev.currentTarget).data('branch') + ' ' + this.model.get('id'));
-		console.log(this.model.collection.get(this.model.get('id')).get('id'));
+		var p = this.model.get('id')
+		var b = $(ev.currentTarget).data('branch');
+		var prodCh = this.model.collection.productChanges;
 
-		//console.log(this.coll);
-		// console.log($(ev.currentTarget));
+		console.log('listed ' + b + ' ' + p);
+		prodCh.add({type: 'list', id: p + b});
 	},
 	buttonUnlisted: function (ev) {
-		console.log('unlisted ' + $(ev.currentTarget).data('branch') + ' ' + this.model.get('id'));
-		// console.log($(ev.currentTarget));
+		var p = this.model.get('id')
+		var b = $(ev.currentTarget).data('branch');
+		var prodCh = this.model.collection.productChanges;
+
+		console.log('unlisted ' + b + ' ' + p);
+		prodCh.add({type: 'unlist', id: p + b});
 	}
 });
 
@@ -177,15 +192,17 @@ MargaritaApp.addInitializer(function () {
 	var filterCriteria = new FilterCriteria();
 	var navbar = new NavbarLayout();
 
+	var pc = new ProductChanges();
+
 	MargaritaApp.navbarRegion.show(navbar);
 
 	// XXX: maybe defer until updates loaded (to prevent modifications)?
-	navbar.queuedChangesButton.show(new QueuedChangesButtonView());
+	navbar.queuedChangesButton.show(new QueuedChangesButtonView({collection: pc}));
 	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: filterCriteria}));
 
 	MargaritaApp.updates.show(new ProgressBarView());
 
-	var products = new Products();
+	var products = new Products([], pc);
 
 	products.bind('branchesLoaded', function () {
 		var updateTableView = new UpdatesTableView({
