@@ -45,6 +45,7 @@ var Products = Backbone.Collection.extend({
 				}
 
 				prod.set('branches', prodbranches);
+				prod.set('allbranches', allbranches);
 			});
 
 			this_products.trigger("branchesLoaded");
@@ -92,6 +93,21 @@ var NavbarLayout = Backbone.Marionette.Layout.extend({
 var UpdateView = Backbone.Marionette.ItemView.extend({
 	tagName: 'tr',
 	template: '#update-row',
+	events: {
+		'click .button-listed': 'buttonListed',
+		'click .button-unlisted': 'buttonUnlisted'
+	},
+	buttonListed: function (ev) {
+		console.log('listed ' + $(ev.currentTarget).data('branch') + ' ' + this.model.get('id'));
+		console.log(this.model.collection.get(this.model.get('id')).get('id'));
+
+		//console.log(this.coll);
+		// console.log($(ev.currentTarget));
+	},
+	buttonUnlisted: function (ev) {
+		console.log('unlisted ' + $(ev.currentTarget).data('branch') + ' ' + this.model.get('id'));
+		// console.log($(ev.currentTarget));
+	}
 });
 
 var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
@@ -109,7 +125,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		return data;
 	},
 	appendHtml: function(collectionView, itemView) {
-		// yuck.. this function smells bad
+		// yuck.. this function smells bad. perhaps refactor with _.reduce
 
 		var show = false;
 		var depr = itemView.model.get('depr');

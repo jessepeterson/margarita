@@ -109,15 +109,15 @@
 <% } %>
 </td>
 
-<% _.each(branches, function(b) { %>
+<% _.each(_.zip(allbranches, branches), function(b) { %>
 
 <td>
-<% if (b) { %>
-	<button class="btn btn-mini btn-success">
+<% if (b[1] != null) { %>
+	<button data-branch="<%= b[0] %>" class="btn btn-mini btn-success button-listed">
 	<i class="icon-ok icon-white"></i> <span>Listed</span>
 	</button>
 <% } else { %>
-	<button class="btn btn-mini">
+	<button data-branch="<%= b[0] %>" class="btn btn-mini button-unlisted">
 	<i class="icon-remove"></i> <span>Unlisted</span>
 	</button>
 <% } %>
