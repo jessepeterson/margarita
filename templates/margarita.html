@@ -113,13 +113,37 @@
 
 <td>
 <% if (b[1] != null) { %>
-	<button data-branch="<%= b[0] %>" class="btn btn-mini btn-success button-listed">
-	<i class="icon-ok icon-white"></i> <span>Listed</span>
-	</button>
+	<% if (queued) { %>
+		<button
+			data-branch="<%= b[0] %>"
+			data-listed="yes"
+			class="btn btn-mini btn-info button-listed">
+				<i class="icon-minus-sign icon-white"></i> <span>Delisting queued</span>
+		</button>
+	<% } else { %>
+		<button
+			data-branch="<%= b[0] %>"
+			data-listed="yes"
+			class="btn btn-mini btn-success button-listed">
+				<i class="icon-ok icon-white"></i> <span>Listed</span>
+		</button>
+	<% } %>
 <% } else { %>
-	<button data-branch="<%= b[0] %>" class="btn btn-mini button-unlisted">
-	<i class="icon-remove"></i> <span>Unlisted</span>
-	</button>
+	<% if (queued) { %>
+		<button
+			data-branch="<%= b[0] %>"
+			data-listed="no"
+			class="btn btn-mini btn-info button-unlisted">
+				<i class="icon-plus-sign icon-white"></i> <span>Listing qeueued</span>
+		</button>
+	<% } else { %>
+		<button
+			data-branch="<%= b[0] %>"
+			data-listed="no"
+			class="btn btn-mini button-unlisted">
+				<i class="icon-remove"></i> <span>Unlisted</span>
+		</button>
+	<% } %>
 <% } %>
 </td>
 

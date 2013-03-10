@@ -56,6 +56,13 @@ var Products = Backbone.Collection.extend({
 
 			this_products.trigger("branchesLoaded");
 		}});
+	},
+
+	parse: function(response) {
+		_.each(response, function (r) {
+			r.queued = false;
+		});
+		return response;
 	}
 });
 
@@ -104,25 +111,37 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 	tagName: 'tr',
 	template: '#update-row',
 	events: {
-		'click .button-listed': 'buttonListed',
-		'click .button-unlisted': 'buttonUnlisted'
+		'click .button-listed':   'productBranchButtonClick',
+		'click .button-unlisted': 'productBranchButtonClick'
 	},
-	buttonListed: function (ev) {
-		var p = this.model.get('id')
-		var b = $(ev.currentTarget).data('branch');
-		var prodCh = this.model.collection.productChanges;
-
-		console.log('listed ' + b + ' ' + p);
-		prodCh.add({type: 'list', id: p + b});
+	initialize: function() {
+		this.model.bind('change', this.render, this);
 	},
-	buttonUnlisted: function (ev) {
-		var p = this.model.get('id')
-		var b = $(ev.currentTarget).data('branch');
-		var prodCh = this.model.collection.productChanges;
+	productBranchButtonClick: function (ev) {
+		var productId = this.model.get('id')
+		var branchName = $(ev.currentTarget).data('branch');
+		var prodChanges = this.model.collection.productChanges;
+		var changeId = productId + branchName;
+		var queued = this.model.get('queued');
 
-		console.log('unlisted ' + b + ' ' + p);
-		prodCh.add({type: 'unlist', id: p + b});
-	}
+		if ($(ev.currentTarget).data('listed') == "yes")
+			var listed = true;
+		else
+			var listed = false;
+
+		if (queued) {
+			prodChanges.remove({id: changeId});
+			this.model.set('queued', false);
+		} else {
+			prodChanges.add({
+				id: changeId,
+				type: listed ? true : false,
+				productId: productId,
+				branch: branchName
+			});
+			this.model.set('queued', true);
+		}
+	},
 });
 
 var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
