@@ -14,6 +14,10 @@ from operator import itemgetter
 
 from reposadolib import reposadocommon
 
+# BeautifulSoup is used to parse the description for an update
+from bs4 import BeautifulSoup, SoupStrainer
+import re
+
 @app.route('/')
 def index():
     return render_template('margarita.html')
@@ -28,14 +32,25 @@ def list_branches():
 def products():
 	products = reposadocommon.getProductInfo()
 	prodlist = []
+	
+	only_p_tags = SoupStrainer("p")
+
 	for prodid in products.keys():
 		if 'title' in products[prodid] and 'version' in products[prodid] and 'PostDate' in products[prodid]:
+
+			if 'description' in products[prodid] and products[prodid]['description'] != '':
+			    soup = BeautifulSoup(products[prodid]['description'], "lxml", parse_only=only_p_tags)
+			    description = soup.prettify(formatter="html")
+			else:
+			    description = '<p>No description provided.</p>'
+			    
 			prodlist.append({
-			    'title':    products[prodid]['title'],
-			    'version':  products[prodid]['version'],
-			    'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
-			    'id':       prodid,
-			    'depr':     len(products[prodid].get('AppleCatalogs', [])) < 1,
+			    'title':       products[prodid]['title'],
+			    'version':     products[prodid]['version'],
+			    'PostDate':    products[prodid]['PostDate'].strftime('%Y-%m-%d'),
+			    'id':          prodid,
+			    'description': description,
+			    'depr':        len(products[prodid].get('AppleCatalogs', [])) < 1,
 			    })
 		else:
 			print 'Invalid update!'
