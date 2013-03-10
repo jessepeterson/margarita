@@ -227,6 +227,7 @@ function refresh_updates_rows() {
 	    }
 
 	    // loop through branches
+	    unlistedCount = 0;
 	    $.each(branches, function(branch) {
 		text += '<td>' +
 		    '<button class="btn btn-mini ';
@@ -240,6 +241,7 @@ function refresh_updates_rows() {
 			'</td>';
 		} else {
 		    unlistedProducts = true;
+		    unlistedCount = unlistedCount + 1
 		    text += 'unlisted" onClick="toggle_queue_listing(this,' + "'" +
 			product['id'] + "','" + 
 			branch + "'" + ');"' +
@@ -253,7 +255,9 @@ function refresh_updates_rows() {
 	    
 	    // hide commonly listed items to save space
 	    if (unlistedProducts || (hideCommonlyListed == false) || (product['depr'] == true)) {
-		allrowtext += text;
+			if (!(hideCommonlyListed == true && product['depr'] == true && unlistedCount == branchct)) {
+				allrowtext += text;
+			}
 	    }
 	});
 	$("#swupdates").append(allrowtext);
