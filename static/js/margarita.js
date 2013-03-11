@@ -102,7 +102,7 @@ var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 	applyQueuedChanges: function()
 	{
 		if (this.collection.length < 1) {
-			alert('No products in the queue yet. Make some changes first.');
+			alert('No products in the change queue yet. Make some changes to a branch first.');
 			return;
 		}
 
