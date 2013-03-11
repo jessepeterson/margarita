@@ -203,20 +203,15 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 			// if the update is deprecated
 			show = true;
 		} else {
-			var itemBranches = itemView.model.get('branches');
+			var prodBranches = itemView.model.get('branches');
 
-			/* loop through list of branches. try to show those updates
-			   that are not commonly listed. that is: show all updates that
-			   are not listed in at least one branch, including apple's
-			   "branch" (e.g. not deprecated) */
-			var bTrack = (depr == false);
-			for (var bIdx=0; bIdx < itemBranches.length; bIdx++) {
-				if (bTrack != (itemBranches[bIdx] != null)) {
-					show = true;
-					break;
-				}
-				bTrack = itemBranches[bIdx] != null;
-			}
+			var listedArr = _.pluck(prodBranches, 'listed');
+			listedArr.push(!depr);
+
+			if (_.contains(listedArr, false) == true)
+				// show if any branch is unlisted, including
+				// being deprecated (not in "Apple" branch)
+				show = true;
 		}
 
 		if (show == true) {
