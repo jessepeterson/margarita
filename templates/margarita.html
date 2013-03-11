@@ -109,37 +109,33 @@
 <% } %>
 </td>
 
-<% _.each(_.zip(allbranches, branches), function(b) { %>
+<% _.each(branches, function(branch) { %>
 
 <td>
-<% if (b[1] != null) { %>
-	<% if (queued) { %>
+<% if (branch.listed) { %>
+	<% if (branch.queued) { %>
 		<button
-			data-branch="<%= b[0] %>"
-			data-listed="yes"
+			data-branch="<%= branch.name %>"
 			class="btn btn-mini btn-info button-listed">
 				<i class="icon-minus-sign icon-white"></i> <span>Delisting queued</span>
 		</button>
 	<% } else { %>
 		<button
-			data-branch="<%= b[0] %>"
-			data-listed="yes"
+			data-branch="<%= branch.name %>"
 			class="btn btn-mini btn-success button-listed">
 				<i class="icon-ok icon-white"></i> <span>Listed</span>
 		</button>
 	<% } %>
 <% } else { %>
-	<% if (queued) { %>
+	<% if (branch.queued) { %>
 		<button
-			data-branch="<%= b[0] %>"
-			data-listed="no"
+			data-branch="<%= branch.name %>"
 			class="btn btn-mini btn-info button-unlisted">
 				<i class="icon-plus-sign icon-white"></i> <span>Listing qeueued</span>
 		</button>
 	<% } else { %>
 		<button
-			data-branch="<%= b[0] %>"
-			data-listed="no"
+			data-branch="<%= branch.name %>"
 			class="btn btn-mini button-unlisted">
 				<i class="icon-remove"></i> <span>Unlisted</span>
 		</button>

@@ -47,31 +47,24 @@ var Products = Backbone.Collection.extend({
 		var this_products = this;
 
 		$.ajax({ url: 'branches', dataType: 'json',	success: function(branches) {
-			var allbranches = []
+			this_products.branches = _.pluck(branches, 'name');
 
-			for (var bIdx = 0; bIdx < branches.length; bIdx++)
-				allbranches.push(branches[bIdx].name);
-
-			// save the branch names for later convenience
-			this_products.branches = allbranches;
-
-			console.log('Branches: ' + branches.length.toString() + ' (' + allbranches.toString() + ')');
+			console.log('Branches: ' + branches.length.toString() +
+			            ' (' + this_products.branches.toString() + ')');
 
 			this_products.each(function (prod) {
-				var prodid = prod.get('id');
-				var prodbranches = [];
+				var prodId = prod.get('id');
+				var prodBranches = [];
 
-				for (var bIdx = 0; bIdx < branches.length; bIdx++) {
-					if (_.indexOf(branches[bIdx].products, prodid) != -1)
-						prodbranches.push(branches[bIdx].name);
-					else
-						/* TODO: this is bad hack to distinguish table
-						   columns in the templates. */
-						prodbranches.push(null);
-				}
+				_.each(branches, function (branch) {
+					prodBranches.push({
+						name: branch.name,
+						listed: (_.indexOf(branch.products, prodId) != -1),
+						queued: false,
+					});
+				});
 
-				prod.set('branches', prodbranches);
-				prod.set('allbranches', allbranches);
+				prod.set('branches', prodBranches);
 			});
 
 			this_products.trigger("branchesLoaded");
@@ -155,29 +148,33 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 		this.model.bind('change', this.render, this);
 	},
 	productBranchButtonClick: function (ev) {
-		var productId = this.model.get('id')
-		var branchName = $(ev.currentTarget).data('branch');
 		var prodChanges = this.model.collection.productChanges;
-		var changeId = productId + branchName;
-		var queued = this.model.get('queued');
 
-		if ($(ev.currentTarget).data('listed') == "yes")
-			var listed = true;
-		else
-			var listed = false;
+		// pull in a bunch of data to get our bearings.. seems like too much
+		var productId = this.model.get('id')
+		var branchName = $(ev.currentTarget).data('branch'); // which branch did we click on
+		var prodBranches = this.model.get('branches');
+		var branchArrPos = -1;
+		var branch = _.find(prodBranches, function (b) { branchArrPos++; return b.name == branchName; });
 
-		if (queued) {
+		var changeId = branchName + productId;
+
+		if (branch.queued) {
+			prodBranches[branchArrPos].queued = false;
 			prodChanges.remove({id: changeId});
-			this.model.set('queued', false);
 		} else {
+			prodBranches[branchArrPos].queued = true;
 			prodChanges.add({
 				id: changeId,
-				listed: listed,
-				productId: productId,
-				branch: branchName
+				branch: branch.name,
+				listed: branch.listed,
+				productId: productId
 			});
-			this.model.set('queued', true);
 		}
+
+		// manually trigger events as we're modifying an array directly
+		this.model.trigger('change');
+		this.model.trigger('change:branches');
 	},
 });
 
