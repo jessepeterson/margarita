@@ -10,9 +10,11 @@ var ProductChanges = Backbone.Collection.extend({
 		$.ajax({
 			type: 'POST',
 			url: this.url,
-			data: this.toJSON(),
+			data: JSON.stringify(this.toJSON()),
 			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8',
 			success: function() {
+				console.log('ProductChanges::save() completed');
 			}
 		});
 	}

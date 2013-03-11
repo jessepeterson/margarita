@@ -106,36 +106,32 @@ def add_all(branchname):
 
 @app.route('/process_queue', methods=['POST'])
 def process_queue():
-    queue = json.loads(request.form['queue'])
+	catalog_branches = reposadocommon.getCatalogBranches()
 
-    catalog_branches = reposadocommon.getCatalogBranches()
-    
-    for cat in queue['listing']:
-	if cat not in catalog_branches.keys():
-	    print 'No such catalog'
-	    continue
-	    
-	for prodid in queue['listing'][cat]:
-	    if prodid not in catalog_branches[cat]:
-		# TODO: check for actual prodid?
-		print 'Adding product',prodid,'to cat',cat
-		catalog_branches[cat].append(prodid)
+	for change in request.json:
+		prodId = change['productId']
+		branch = change['branch']
 
-    for cat in queue['delisting']:
-	if cat not in catalog_branches.keys():
-	    print 'No such catalog'
-	    continue
-	    
-	for prodid in queue['delisting'][cat]:
-	    if prodid in catalog_branches[cat]:
-		print 'Removing product',prodid,'from cat',cat
-		catalog_branches[cat].remove(prodid)
+		if branch not in catalog_branches.keys():
+			print 'No such catalog'
+			continue
+		
+		if change['listed']:
+			# if this change /was/ listed, then unlist it
+			if prodId in catalog_branches[branch]:
+				print 'Removing product %s from branch %s' % (prodId, branch, )
+				catalog_branches[branch].remove(prodId)
+		else:
+			# if this change /was not/ listed, then list it
+			if prodId not in catalog_branches[branch]:
+				print 'Adding product %s to branch %s' % (prodId, branch, )
+				catalog_branches[branch].append(prodId)
 
-    reposadocommon.writeCatalogBranches(catalog_branches)
-    reposadocommon.writeAllBranchCatalogs()
+	print 'Writing catalogs'
+	reposadocommon.writeCatalogBranches(catalog_branches)
+	reposadocommon.writeAllBranchCatalogs()
 
-    
-    return jsonify(result=True);
+	return jsonify(result=True)
 
 def main():
 	optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
