@@ -1,7 +1,21 @@
 /* Models */
 
 var ProductChanges = Backbone.Collection.extend({
-	model: Backbone.Model
+	model: Backbone.Model,
+	url: 'process_queue',
+
+	save: function() {
+		var that = this;
+
+		$.ajax({
+			type: 'POST',
+			url: this.url,
+			data: this.toJSON(),
+			dataType: 'json',
+			success: function() {
+			}
+		});
+	}
 });
 
 var Branches = Backbone.Collection.extend({
@@ -78,9 +92,21 @@ var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 	tagName: 'a',
 	attributes: { 'href': '#' },
 	template: "#queuedChangesBtnViewTpl",
+	events: {
+		'click': 'applyQueuedChanges'
+	},
 	initialize: function() {
 		this.collection.bind('add', this.render, this);
 		this.collection.bind('remove', this.render, this);
+	},
+	applyQueuedChanges: function()
+	{
+		if (this.collection.length < 1) {
+			alert('No products in the queue yet. Make some changes first.');
+			return;
+		}
+
+		this.collection.save();
 	}
 });
 
@@ -135,7 +161,7 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 		} else {
 			prodChanges.add({
 				id: changeId,
-				type: listed ? true : false,
+				listed: listed,
 				productId: productId,
 				branch: branchName
 			});
