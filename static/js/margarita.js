@@ -1,11 +1,16 @@
+/* Application */
+
+var MargaritaApp = new Backbone.Marionette.Application();
+
 /* Models */
 
 var ProductChanges = Backbone.Collection.extend({
 	model: Backbone.Model,
 	url: 'process_queue',
 
-	save: function() {
+	save: function(successCallback) {
 		var that = this;
+		var arglength = arguments.length;
 
 		$.ajax({
 			type: 'POST',
@@ -14,7 +19,8 @@ var ProductChanges = Backbone.Collection.extend({
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8',
 			success: function() {
-				console.log('ProductChanges::save() completed');
+				if (arglength >= 1)
+					successCallback(that);
 			}
 		});
 	}
@@ -46,6 +52,7 @@ var Products = Backbone.Collection.extend({
 			for (var bIdx = 0; bIdx < branches.length; bIdx++)
 				allbranches.push(branches[bIdx].name);
 
+			// save the branch names for later convenience
 			this_products.branches = allbranches;
 
 			console.log('Branches: ' + branches.length.toString() + ' (' + allbranches.toString() + ')');
@@ -59,10 +66,7 @@ var Products = Backbone.Collection.extend({
 						prodbranches.push(branches[bIdx].name);
 					else
 						/* TODO: this is bad hack to distinguish table
-						   columns in the templates. would be better to
-						   be able to access the parent collection from
-						   the individual models to see how many branches
-						   we have. */
+						   columns in the templates. */
 						prodbranches.push(null);
 				}
 
@@ -100,6 +104,7 @@ var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 	initialize: function() {
 		this.collection.bind('add', this.render, this);
 		this.collection.bind('remove', this.render, this);
+		this.collection.bind('reset', this.render, this);
 	},
 	applyQueuedChanges: function()
 	{
@@ -108,7 +113,11 @@ var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 			return;
 		}
 
-		this.collection.save();
+		MargaritaApp.trigger("catalogsChanging");
+
+		this.collection.save(function() {
+			MargaritaApp.trigger("catalogsChanged");
+		});
 	}
 });
 
@@ -226,41 +235,42 @@ var ProgressBarView = Backbone.Marionette.ItemView.extend({
 
 /* Application */
 
-MargaritaApp = new Backbone.Marionette.Application();
-
 MargaritaApp.addRegions({
 	navbarRegion: "#navbarRegion",
 	updates: '#updates',
 });
 
+MargaritaApp.on("catalogsChanged", function (options) {
+	MargaritaApp.productChanges.reset();
+	MargaritaApp.products.fetch();
+});
+
+MargaritaApp.on("catalogsChanging", function (options) {
+	MargaritaApp.updates.show(new ProgressBarView());
+});
+
 MargaritaApp.addInitializer(function () {
-	console.log('Starting Margarita Marionette webapp');
-
-	var filterCriteria = new FilterCriteria();
 	var navbar = new NavbarLayout();
-
-	var pc = new ProductChanges();
-
 	MargaritaApp.navbarRegion.show(navbar);
 
-	// XXX: maybe defer until updates loaded (to prevent modifications)?
-	navbar.queuedChangesButton.show(new QueuedChangesButtonView({collection: pc}));
-	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: filterCriteria}));
+	MargaritaApp.trigger('catalogsChanging');
 
-	MargaritaApp.updates.show(new ProgressBarView());
+	MargaritaApp.filterCriteria = new FilterCriteria();
+	MargaritaApp.productChanges = new ProductChanges();
+	MargaritaApp.products = new Products([], MargaritaApp.productChanges);
 
-	var products = new Products([], pc);
-
-	products.bind('branchesLoaded', function () {
+	MargaritaApp.products.bind('branchesLoaded', function () {
 		var updateTableView = new UpdatesTableView({
-			collection: products,
-			filterCriteria: filterCriteria,
+			collection: MargaritaApp.products,
+			filterCriteria: MargaritaApp.filterCriteria,
 		});
 		MargaritaApp.updates.show(updateTableView);
 	});
 
-	products.fetch();
+	navbar.queuedChangesButton.show(new QueuedChangesButtonView({collection: MargaritaApp.productChanges}));
+	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: MargaritaApp.filterCriteria}));
 
+	MargaritaApp.trigger('catalogsChanged');
 });
 
 /* Init */
