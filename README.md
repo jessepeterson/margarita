@@ -86,19 +86,19 @@ Margarita can be started automatically as part of launchd. Included is a launchd
 
 **Linux sysv startup**
 
-[Linux/Mac – Have Margarita Startup Automatically On Boot](http://rileyshott.wordpress.com/2012/09/17/linuxmac-have-margarita-startup-automatically-on-boot/)
+- [Linux/Mac – Have Margarita Startup Automatically On Boot](http://rileyshott.wordpress.com/2012/09/17/linuxmac-have-margarita-startup-automatically-on-boot/)
 
 Other web servers
 -----------------
 
 In the documentation above Margarita runs in the "development" web server built into Flask. This may not be ideal in some situations and there are some alternatives for running in a more "production"-ready webservers. Joe Wollard has an excellent article describing how to setup Margarita using mod_wsgi on Linux using WSGI:
 
-[Running Margarita in Apache](http://denisonmac.wordpress.com/2013/02/28/running-margarita-in-apache)
+- [Running Margarita in Apache](http://denisonmac.wordpress.com/2013/02/28/running-margarita-in-apache)
 
 Setting up on Linux
 -------------------
 
 Helpful guides written by others:
 
-[Setting up Reposado and Margarita on Linux – Part 1](http://macadmincorner.com/setting-up-reposado-and-margarita-on-linux-part-1/)
-[Install Reposado with Margarita on CentOS / Red Hat Enterprise Linux](http://www.adminsys.ch/2012/09/23/install-reposado-margarita-centos-red-hat-enterprise-linux/)
+- [Setting up Reposado and Margarita on Linux – Part 1](http://macadmincorner.com/setting-up-reposado-and-margarita-on-linux-part-1/)
+- [Install Reposado with Margarita on CentOS / Red Hat Enterprise Linux](http://www.adminsys.ch/2012/09/23/install-reposado-margarita-centos-red-hat-enterprise-linux/)
