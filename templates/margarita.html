@@ -74,8 +74,19 @@
 	<th>Post Date</th>
 	<th>Apple branch</th>
 
-	<% _.each(branches, function(b) { %>
-	<th><%= b %> branch</th>
+	<% _.each(branches, function(branch) { %>
+		<th>
+		<div class="btn-group">
+			<button class="btn dropdown-toggle" data-toggle="dropdown">
+				<%= branch %> branch <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a class="addAllProductsMenuSel" data-branch="<%= branch %>" href="#"> Add all products</a></li>
+				<li class="divider"></li>
+				<li><a class="deleteBranchMenuSel" data-branch="<%= branch %>" style="color:red;" href="#"> Delete branch</a></li>
+			</ul>
+		</div>
+		</th>
 	<% }) %>
 </tr>
 </thead>

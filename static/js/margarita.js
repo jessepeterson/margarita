@@ -183,6 +183,10 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	className: 'table table-striped',
 	template: '#update-table',
 	itemView: UpdateView,
+	events: {
+		'click .addAllProductsMenuSel': 'addAllProducts',
+		'click .deleteBranchMenuSel':   'deleteBranch'
+	},
 	initialize: function() {
 		this.options.filterCriteria.bind('change', this.render, this);
 	},
@@ -215,6 +219,28 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		if (show == true) {
 			collectionView.$("tbody").append(itemView.el);
 		}
+	},
+	addAllProducts: function (ev) {
+		var branch = $(ev.currentTarget).data('branch');
+
+		MargaritaApp.trigger("catalogsChanging");
+
+		$.post('add_all/' + encodeURIComponent(branch), {}, function () {
+			MargaritaApp.trigger("catalogsChanged");
+		});
+	},
+	deleteBranch: function (ev) {
+		var branch = $(ev.currentTarget).data('branch');
+
+		if (!confirm('Are you sure you want to delete the branch "' +
+		             branch + '"? Click OK to delete, Cancel otherwise.'))
+			return;
+
+		MargaritaApp.trigger("catalogsChanging");
+
+		$.post('delete_branch/' + encodeURIComponent(branch), {}, function () {
+			MargaritaApp.trigger("catalogsChanged");
+		});
 	}
 });
 
