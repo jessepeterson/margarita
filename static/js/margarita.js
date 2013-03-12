@@ -193,8 +193,6 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		return data;
 	},
 	appendHtml: function(collectionView, itemView) {
-		// yuck.. this function smells bad. perhaps refactor with _.reduce
-
 		var show = false;
 		var depr = itemView.model.get('depr');
 
@@ -223,6 +221,24 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 var ProgressBarView = Backbone.Marionette.ItemView.extend({
 	// className: 'span4 offset4', // smaller progress bar
 	template: '#span12-progress-bar',
+});
+
+var NewBranchFormView = Backbone.View.extend({
+	events: {
+		'click button': 'newBranch'
+	},
+	newBranch: function () {
+		var newBranchInput = $('#branchname', this.el);
+
+		MargaritaApp.trigger("catalogsChanging");
+
+		// TODO: consider using an actual Backbone.Model instead
+		// of a direct jQuery post method
+		$.post('new_branch/' + encodeURIComponent(newBranchInput.val()), {}, function () {
+			newBranchInput.val('');
+			MargaritaApp.trigger("catalogsChanged");
+		});
+	}
 });
 
 /* Application */
@@ -263,6 +279,8 @@ MargaritaApp.addInitializer(function () {
 	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: MargaritaApp.filterCriteria}));
 
 	MargaritaApp.trigger('catalogsChanged');
+
+	var newBranchFormView = new NewBranchFormView({el: $('#newbranch')});
 });
 
 /* Init */
