@@ -16,7 +16,7 @@ Margarita is based on reposado and [Flask](http://flask.pocoo.org/). Flask is a 
 
 See the [reposado](http://github.com/wdas/reposado) project for how to install and configure it. It needs to be setup and configured with at least Apple's software update catalogs initially synced.
 
-__Note__: Reposado may be installed either via setup.py/setuptools or simply run from the code files (either by downloading and extracting the files or by cloning the repository, etc.). Running from the code files is the documented way to run reposado. It is important to know in which way reposado is installed as Margarita needs to reference the location of the reposado library files which are located wherever reposado is installed. See below on installation for details on setup. Thanks to [timsutton](/timsutton) on [issue #1](issues/1) for clarifying this.
+__Note__: Reposado may be installed either via setup.py/setuptools or simply run from the code files (either by downloading and extracting the files or by cloning the repository, etc.). Running from the code files is the documented way to run reposado. It is important to know in which way reposado is installed as Margarita needs to reference the location of the reposado library files which are located wherever reposado is installed. See below on installation for details on setup. Thanks to [timsutton](https://github.com/timsutton) on [issue #1](https://github.com/jessepeterson/margarita/issues/1) for clarifying this.
 
 **Flask**
 
@@ -84,9 +84,21 @@ Margarita can be started automatically as part of launchd. Included is a launchd
 2. Modify the plist to specify installation directory (namely the second item of the ProgramArguments key) and any other locations or modifications.
 3. Start up the plist file ```sudo launchctl load -w /Library/LaunchDaemons/com.github.jessepeterson.margarita.plist```
 
+**Linux sysv startup**
+
+[Linux/Mac – Have Margarita Startup Automatically On Boot](http://rileyshott.wordpress.com/2012/09/17/linuxmac-have-margarita-startup-automatically-on-boot/)
+
 Other web servers
 -----------------
 
 In the documentation above Margarita runs in the "development" web server built into Flask. This may not be ideal in some situations and there are some alternatives for running in a more "production"-ready webservers. Joe Wollard has an excellent article describing how to setup Margarita using mod_wsgi on Linux using WSGI:
 
 [Running Margarita in Apache](http://denisonmac.wordpress.com/2013/02/28/running-margarita-in-apache)
+
+Setting up on Linux
+-------------------
+
+Helpful guides written by others:
+
+[Setting up Reposado and Margarita on Linux – Part 1](http://macadmincorner.com/setting-up-reposado-and-margarita-on-linux-part-1/)
+[Install Reposado with Margarita on CentOS / Red Hat Enterprise Linux](http://www.adminsys.ch/2012/09/23/install-reposado-margarita-centos-red-hat-enterprise-linux/)
