@@ -78,7 +78,7 @@ Automatic Startup
 
 **launchd**
 
-Margarita can be started automatically as part of launchd. Included is a launchd.plist file (originally supllied by stazeii in issue #2 - thanks!). It may need to be modified to fit your environment, installation locations, user specifications, etc.
+Margarita can be started automatically as part of launchd. Included is a launchd.plist file (originally supplied by [stazeii](https://github.com/stazeii) in [issue #2](https://github.com/jessepeterson/margarita/issues/2) - thanks!). It may need to be modified to fit your environment, installation locations, user specifications, etc.
 
 1. Copy plist file to ```/Library/LaunchDaemons/```
 2. Modify the plist to specify installation directory (namely the second item of the ProgramArguments key) and any other locations or modifications.
