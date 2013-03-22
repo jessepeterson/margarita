@@ -142,10 +142,12 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 	template: '#update-row',
 	events: {
 		'click .button-listed':   'productBranchButtonClick',
-		'click .button-unlisted': 'productBranchButtonClick'
+		'click .button-unlisted': 'productBranchButtonClick',
+		'click .info-toggle-button': 'toggleInfo'
 	},
 	initialize: function() {
 		this.model.bind('change', this.render, this);
+		this.showInfo = false;
 	},
 	productBranchButtonClick: function (ev) {
 		var prodChanges = this.model.collection.productChanges;
@@ -176,6 +178,27 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 		this.model.trigger('change');
 		this.model.trigger('change:branches');
 	},
+	toggleInfo: function(ev) {
+		this.showInfo = !this.showInfo;
+		var myTr = $(ev.currentTarget).closest('tr');
+
+		if (this.showInfo) {
+			$(ev.currentTarget).addClass('active');
+
+			// TODO: turn into Backbone sub-view?
+			var colLen = this.model.get('branches').length + 5; // 5 is static columns
+			var descrMarkup = $(
+				'<tr><td colspan="' + colLen.toString() + 
+				'"><div class="well"><p>' + this.model.get('description') +
+				'</p><hr><p><strong>Product ID: ' + this.model.get('id') +
+				'</strong></p></div></td></tr>');
+			myTr.after(descrMarkup);
+
+		} else {
+			$(ev.currentTarget).removeClass('active');
+			myTr.next().remove();
+		}
+	}
 });
 
 var UpdatesTableView = Backbone.Marionette.CompositeView.extend({

@@ -34,6 +34,41 @@ def list_branches():
 
 	return json_response(branches)
 
+def get_description_content(html):
+	if len(html) == 0:
+		return None
+
+	# in the interest of (attempted) speed, try to avoid regexps
+	lwrhtml = html.lower()
+
+	celem = 'p'
+	startloc = lwrhtml.find('<' + celem + '>')
+
+	if startloc == -1:
+		startloc = lwrhtml.find('<' + celem + ' ')
+
+	if startloc == -1:
+		celem = 'body'
+		startloc = lwrhtml.find('<' + celem)
+
+		if startloc != -1:
+			startloc += 6 # length of <body>
+
+	if startloc == -1:
+		# no <p> nor <body> tags. bail.
+		return None
+
+	endloc = lwrhtml.rfind('</' + celem + '>')
+
+	if endloc == -1:
+		endloc = len(html)
+	elif celem != 'body':
+		# if the element is a body tag, then don't include it.
+		# DOM parsing will just ignore it anyway
+		endloc += len(celem) + 3
+
+	return html[startloc:endloc]
+
 @app.route('/products', methods=['GET'])
 def products():
 	products = reposadocommon.getProductInfo()
@@ -41,12 +76,13 @@ def products():
 	for prodid in products.keys():
 		if 'title' in products[prodid] and 'version' in products[prodid] and 'PostDate' in products[prodid]:
 			prodlist.append({
-			    'title':    products[prodid]['title'],
-			    'version':  products[prodid]['version'],
-			    'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
-			    'id':       prodid,
-			    'depr':     len(products[prodid].get('AppleCatalogs', [])) < 1,
-			    })
+				'title': products[prodid]['title'],
+				'version': products[prodid]['version'],
+				'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
+				'description': get_description_content(products[prodid]['description']),
+				'id': prodid,
+				'depr': len(products[prodid].get('AppleCatalogs', [])) < 1,
+				})
 		else:
 			print 'Invalid update!'
 

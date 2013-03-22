@@ -69,7 +69,7 @@
 <script id="update-table" type="text/html">
 <thead>
 <tr>
-	<th>Software Update Product</th>
+	<th colspan="2">Software Update Product</th>
 	<th>Version</th>
 	<th>Post Date</th>
 	<th>Apple branch</th>
@@ -105,6 +105,9 @@
 	<% if (depr) { %>
 		<span class="label label-warning">Deprecated</span>
 	<% } %>
+</td>
+<td>
+	<button class="info-toggle-button btn btn-mini"><i class="icon-info-sign"></i></button>
 </td>
 <td><%= version %></td>
 <td><%= PostDate %></td>
