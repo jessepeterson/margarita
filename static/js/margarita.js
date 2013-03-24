@@ -137,13 +137,19 @@ var NavbarLayout = Backbone.Marionette.Layout.extend({
 	}
 });
 
+var UpdateDescriptionView = Backbone.Marionette.ItemView.extend({
+	tagName: 'tr',
+	template: '#vw-update-description',
+})
+
 var UpdateView = Backbone.Marionette.ItemView.extend({
 	tagName: 'tr',
 	template: '#update-row',
 	events: {
 		'click .button-listed':   'productBranchButtonClick',
 		'click .button-unlisted': 'productBranchButtonClick',
-		'click .info-toggle-button': 'toggleInfo'
+		'click .info-toggle-button': 'toggleInfo',
+		'click .info-toggle': 'toggleInfo',
 	},
 	initialize: function() {
 		this.model.bind('change', this.render, this);
@@ -180,30 +186,28 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 	},
 	toggleInfo: function(ev) {
 		this.showInfo = !this.showInfo;
-		var myTr = $(ev.currentTarget).closest('tr');
+		var updateTr = $(ev.currentTarget).closest('tr');
+		var toggleBtn = $(updateTr).find('.info-toggle-button');
+		console.log(toggleBtn);
+
+		if (!this.updView) {
+			this.updView = new UpdateDescriptionView({model: this.model});
+			this.updView.render();
+		}
 
 		if (this.showInfo) {
-			$(ev.currentTarget).addClass('active');
-
-			// TODO: turn into Backbone sub-view?
-			var colLen = this.model.get('branches').length + 5; // 5 is static columns
-			var descrMarkup = $(
-				'<tr><td colspan="' + colLen.toString() + 
-				'"><div class="well"><p>' + this.model.get('description') +
-				'</p><hr><p><strong>Product ID: ' + this.model.get('id') +
-				'</strong></p></div></td></tr>');
-			myTr.after(descrMarkup);
-
+			toggleBtn.addClass('active');
+			updateTr.after(this.updView.el);
 		} else {
-			$(ev.currentTarget).removeClass('active');
-			myTr.next().remove();
+			toggleBtn.removeClass('active');
+			updateTr.next().remove();
 		}
 	}
 });
 
 var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	tagName: 'table',
-	className: 'table table-striped',
+	className: 'table',
 	template: '#update-table',
 	itemView: UpdateView,
 	events: {

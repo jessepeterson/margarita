@@ -99,9 +99,24 @@
 </div>
 </script>
 
+<script id="vw-update-description" type="text/html">
+<td colspan="<%= branches.length + 5 %>">
+	<div class="well" style="margin:0;">
+		<p><%= description %></p>
+		<hr>
+		<p>
+			<strong>
+				Product ID:
+				<span style="font-family:monospace"><%= id %></span>
+			</strong>
+		</p>
+	</div>
+</td>
+</script>
+
 <script id="update-row" type="text/template">
 <td>
-	<span title="Product ID: <%= id %>"><%= title %></span>
+	<span title="Product ID: <%= id %>" class="info-toggle"><%= title %></span>
 	<% if (depr) { %>
 		<span class="label label-warning">Deprecated</span>
 	<% } %>
