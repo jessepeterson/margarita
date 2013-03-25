@@ -10,6 +10,13 @@
 		body {
 			padding-top: 60px;
 		}
+		body,
+		button,
+		.btn-group > .btn,
+		.btn-group > .dropdown-menu {
+			/* bootstrap changed default font size; change it back */
+			font-size: 13px;
+		}
 	</style>
 	<link href="static/css/bootstrap-responsive.min.css" rel="stylesheet">
 
@@ -36,7 +43,7 @@
 <!-- Templates -->
 
 <script id="navbarLayout" type="text/html">
-<div class="navbar navbar-fixed-top">
+<div class="navbar navbar-fixed-top navbar-inverse">
 	<div class="navbar-inner">
 		<div class="container">
 			<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
