@@ -217,7 +217,6 @@ var UpdateView = Backbone.Marionette.ItemView.extend({
 		this.showInfo = !this.showInfo;
 		var updateTr = $(ev.currentTarget).closest('tr');
 		var toggleBtn = $(updateTr).find('.info-toggle-button');
-		console.log(toggleBtn);
 
 		if (!this.updView) {
 			this.updView = new UpdateDescriptionView({model: this.model});
