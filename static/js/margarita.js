@@ -128,12 +128,41 @@ var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
 	},
 });
 
+var SearchBoxView = Backbone.Marionette.ItemView.extend({
+	template: '#vw-search',
+	events: {
+		'keypress input': 'keypress',
+		'keyup input': 'keypress',
+		'submit form': function(ev) { ev.preventDefault(); },
+			// disable form submission (mostly to prevent using enter key)
+	},
+	keypress: function() {
+		if (this.searchTimer)
+			window.clearTimeout(this.searchTimer);
+
+		that = this;
+
+		this.searchTimer = window.setTimeout(function() {
+			that.searchTimer = null;
+			var filterText = that.$el.find('input').val();
+			
+			if (filterText)
+				console.log('Filtering on "' + filterText + '"');
+			else
+				console.log('No text filtering');
+
+			that.model.set('filterText', filterText);
+		}, 200);
+	},
+});
+
 var NavbarLayout = Backbone.Marionette.Layout.extend({
 	template: "#navbarLayout",
 
 	regions: {
 		queuedChangesButton:    "#queuedChangesButtonViewRegion",
-		toggleHideCommonButton: "#toggleHideCommonButtonViewRegion"
+		toggleHideCommonButton: "#toggleHideCommonButtonViewRegion",
+		searchBox: '#rgn-search',
 	}
 });
 
@@ -234,6 +263,9 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		} else {
 			var prodBranches = itemView.model.get('branches');
 
+			// this is a little hackish: create an array out of the
+			// "listed" status of each branch, including the "deprecated"
+			// status (on the Apple branch) as one of those statuses
 			var listedArr = _.pluck(prodBranches, 'listed');
 			listedArr.push(!depr);
 
@@ -241,6 +273,13 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 				// show if any branch is unlisted, including
 				// being deprecated (not in "Apple" branch)
 				show = true;
+		}
+
+		var filterText = this.options.filterCriteria.get('filterText');
+		if (filterText) {
+			var title = itemView.model.get('title');
+			if (title.toLowerCase().indexOf(filterText.toLowerCase()) == -1)
+				show = false;
 		}
 
 		if (show == true) {
@@ -330,6 +369,7 @@ MargaritaApp.addInitializer(function () {
 
 	navbar.queuedChangesButton.show(new QueuedChangesButtonView({collection: MargaritaApp.productChanges}));
 	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: MargaritaApp.filterCriteria}));
+	navbar.searchBox.show(new SearchBoxView({model: MargaritaApp.filterCriteria}));
 
 	MargaritaApp.trigger('catalogsChanged');
 
