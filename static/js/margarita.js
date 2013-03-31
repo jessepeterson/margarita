@@ -99,8 +99,9 @@ var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 		this.collection.bind('remove', this.render, this);
 		this.collection.bind('reset', this.render, this);
 	},
-	applyQueuedChanges: function()
-	{
+	applyQueuedChanges: function(ev) {
+		ev.preventDefault();
+
 		if (this.collection.length < 1) {
 			alert('No products in the change queue yet. Make some changes to a branch first.');
 			return;
@@ -122,7 +123,9 @@ var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
 	initialize: function() {
 		this.model.bind('change', this.render, this);
 	},
-	click: function() {
+	click: function(ev) {
+		ev.preventDefault();
+
 		// toggle the hideCommon flag
 		this.model.set('hideCommon', !this.model.get('hideCommon'));
 	},
