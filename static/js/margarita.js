@@ -317,7 +317,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 
 		if (!confirm('Duplicating will overwrite the branch "' + branch + 
 		        '". Are you sure you want to do this? Click OK' + 
-		        ' to duplicate, Cancel otherwise.'))
+		        ' to duplicate the Apple direct branch, Cancel otherwise.'))
 			return;
 
 		console.log("duplicating apple direct into " + branch);
@@ -335,7 +335,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 
 		if (!confirm('Duplicating will overwrite the branch "' + branch + 
 		        '". Are you sure you want to do this? Click OK' + 
-		        ' to duplicate, Cancel otherwise.'))
+		        ' to duplicate "' + dupbranch + '", Cancel otherwise.'))
 			return;
 
 		console.log("duplicating " + dupbranch + " into " + branch);
