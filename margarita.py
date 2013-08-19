@@ -169,6 +169,29 @@ def process_queue():
 
 	return jsonify(result=True)
 
+@app.route('/dup_apple/<branchname>', methods=['POST'])
+def dup_apple(branchname):
+	catalog_branches = reposadocommon.getCatalogBranches()
+
+	if branchname not in catalog_branches.keys():
+		print 'No branch ' + branchname
+		return jsonify(result=False)
+
+	# generate list of (non-drepcated) updates
+	products = reposadocommon.getProductInfo()
+	prodlist = []
+	for prodid in products.keys():
+		if len(products[prodid].get('AppleCatalogs', [])) >= 1:
+			prodlist.append(prodid)
+
+	catalog_branches[branchname] = prodlist
+
+	print 'Writing catalogs'
+	reposadocommon.writeCatalogBranches(catalog_branches)
+	reposadocommon.writeAllBranchCatalogs()
+
+	return jsonify(result=True)
+
 def main():
 	optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
 

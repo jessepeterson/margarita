@@ -243,7 +243,9 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	itemView: UpdateView,
 	events: {
 		'click .addAllProductsMenuSel': 'addAllProducts',
-		'click .deleteBranchMenuSel':   'deleteBranch'
+		'click .deleteBranchMenuSel':   'deleteBranch',
+		'click .duplicateAppleBranch':  'duplicateAppleBranch',
+		'click .duplicateBranch':       'duplicateBranch',
 	},
 	initialize: function() {
 		this.options.filterCriteria.bind('change', this.render, this);
@@ -301,7 +303,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		var branch = $(ev.currentTarget).data('branch');
 
 		if (!confirm('Are you sure you want to delete the branch "' +
-		             branch + '"? Click OK to delete, Cancel otherwise.'))
+		        branch + '"? Click OK to delete, Cancel otherwise.'))
 			return;
 
 		MargaritaApp.trigger("catalogsChanging");
@@ -309,7 +311,32 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		$.post('delete_branch/' + encodeURIComponent(branch), {}, function () {
 			MargaritaApp.trigger("catalogsChanged");
 		});
-	}
+	},
+	duplicateAppleBranch: function(ev) {
+		var branch = $(ev.currentTarget).data('branch');
+
+		console.log("duplicating appel direct branch into " + branch);
+
+		if (!confirm('Duplicating will overwrite the branch "' + branch + 
+		        branch + '". Are you sure you want to do this?? Click OK' + 
+		        ' to duplicate, Cancel otherwise.'))
+			return;
+
+		console.log('hi');
+
+		MargaritaApp.trigger("catalogsChanging");
+
+		$.post('dup_apple/' + encodeURIComponent(branch), {}, function () {
+			MargaritaApp.trigger("catalogsChanged");
+		});
+
+	},
+	duplicateBranch: function(ev) {
+		var branch = $(ev.currentTarget).data('branch');
+		var dupbranch = $(ev.currentTarget).data('dupbranch');
+
+		console.log("duplicating " + dupbranch + " into " + branch);
+	},
 });
 
 var ProgressBarView = Backbone.Marionette.ItemView.extend({

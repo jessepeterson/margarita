@@ -96,7 +96,14 @@
 				<strong><%= branch %></strong> branch <span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu">
-				<li><a class="addAllProductsMenuSel" data-branch="<%= branch %>" href="#"> Add all products</a></li>
+				<li><a class="addAllProductsMenuSel" data-branch="<%= branch %>" href="#"> Add <strong>all</strong> products</a></li>
+				<li class="divider"></li>
+				<li><a class="duplicateAppleBranch" data-branch="<%= branch %>" href="#">Duplicate <strong>Apple direct</strong> branch</a></li>
+				<% _.each(branches, function(dupbranch) { %>
+					<% if (dupbranch != branch) { %>
+					<li><a class="duplicateBranch" href="#" data-branch="<%= branch %>" data-dupbranch="<%= dupbranch %>">Duplicate <strong><%= dupbranch %></strong> branch</a></li>
+					<% } %>
+				<% }) %>
 				<li class="divider"></li>
 				<li><a class="deleteBranchMenuSel" data-branch="<%= branch %>" style="color:red;" href="#"> Delete branch</a></li>
 			</ul>
