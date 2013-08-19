@@ -315,14 +315,12 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	duplicateAppleBranch: function(ev) {
 		var branch = $(ev.currentTarget).data('branch');
 
-		console.log("duplicating appel direct branch into " + branch);
-
 		if (!confirm('Duplicating will overwrite the branch "' + branch + 
-		        branch + '". Are you sure you want to do this?? Click OK' + 
+		        '". Are you sure you want to do this? Click OK' + 
 		        ' to duplicate, Cancel otherwise.'))
 			return;
 
-		console.log('hi');
+		console.log("duplicating apple direct into " + branch);
 
 		MargaritaApp.trigger("catalogsChanging");
 
@@ -335,7 +333,18 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		var branch = $(ev.currentTarget).data('branch');
 		var dupbranch = $(ev.currentTarget).data('dupbranch');
 
+		if (!confirm('Duplicating will overwrite the branch "' + branch + 
+		        '". Are you sure you want to do this? Click OK' + 
+		        ' to duplicate, Cancel otherwise.'))
+			return;
+
 		console.log("duplicating " + dupbranch + " into " + branch);
+
+		MargaritaApp.trigger("catalogsChanging");
+
+		$.post('dup/' + encodeURIComponent(dupbranch) + '/' + encodeURIComponent(branch), {}, function () {
+			MargaritaApp.trigger("catalogsChanged");
+		});
 	},
 });
 

@@ -192,6 +192,22 @@ def dup_apple(branchname):
 
 	return jsonify(result=True)
 
+@app.route('/dup/<frombranch>/<tobranch>', methods=['POST'])
+def dup(frombranch, tobranch):
+	catalog_branches = reposadocommon.getCatalogBranches()
+
+	if frombranch not in catalog_branches.keys() or tobranch not in catalog_branches.keys():
+		print 'No branch ' + branchname
+		return jsonify(result=False)
+
+	catalog_branches[tobranch] = catalog_branches[frombranch]
+
+	print 'Writing catalogs'
+	reposadocommon.writeCatalogBranches(catalog_branches)
+	reposadocommon.writeAllBranchCatalogs()
+
+	return jsonify(result=True)
+
 def main():
 	optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
 
