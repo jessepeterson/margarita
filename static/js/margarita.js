@@ -35,10 +35,13 @@ var Products = Backbone.Collection.extend({
 	model: Backbone.Model,
 	url: 'products',
 
-	initialize: function(models, productChanges) {
-		this.productChanges = productChanges || new ProductChanges();
+	initialize: function(models, options) {
+		if (typeof(options) == "object" && 'productChanges' in options)
+			this.productChanges = options['productChanges'];
+		else
+			this.productChanges = new ProductChanges();
 
-		this.bind('reset', this.fetchBranches);
+		this.bind('sync', this.fetchBranches);
 	},
 
 	fetchBranches: function() {
@@ -395,7 +398,7 @@ MargaritaApp.addInitializer(function () {
 
 	MargaritaApp.filterCriteria = new FilterCriteria();
 	MargaritaApp.productChanges = new ProductChanges();
-	MargaritaApp.products = new Products([], MargaritaApp.productChanges);
+	MargaritaApp.products = new Products([], {productChanges: MargaritaApp.productChanges});
 
 	MargaritaApp.products.bind('branchesLoaded', function () {
 		var updateTableView = new UpdatesTableView({
