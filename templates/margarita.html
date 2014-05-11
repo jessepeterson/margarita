@@ -17,8 +17,25 @@
 			/* bootstrap changed default font size; change it back */
 			font-size: 13px;
 		}
+		#updates,
+		#paginator {
+			margin-bottom: 1em;
+		}
 	</style>
 	<link href="static/css/bootstrap-responsive.min.css" rel="stylesheet">
+	<link href="static/css/backgrid.min.css" rel="stylesheet" />
+	<link href="static/css/backgrid-paginator.min.css" rel="stylesheet" />
+
+	<style>
+		.backgrid th {
+			text-align: left;
+		}
+		/* allow for drop-down menus in the branch header cells */
+		.backgrid th.branch-header {
+			overflow: visible;
+		}
+	</style>
+
 
 	<script src="static/js/json2.js"></script>
 	<script src="static/js/jquery.min.js"></script>
@@ -32,6 +49,7 @@
 <div class="container">
 
 	<div id="updates"></div>
+	<div id="paginator"></div>
 
 	<div id="newbranch" style="text-align:right;" class="well form-inline">
 		<input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
@@ -81,40 +99,6 @@
 <i class="icon-white<% if (hideCommon) { %> icon-ok<% } %>"></i> <span>Hide commonly listed updates</span>
 </script>
 
-<script id="update-table" type="text/html">
-<thead>
-<tr>
-	<th colspan="2">Software Update Product</th>
-	<th>Version</th>
-	<th>Post Date</th>
-	<th>Apple branch</th>
-
-	<% _.each(branches, function(branch) { %>
-		<th>
-		<div class="btn-group">
-			<button class="btn dropdown-toggle" data-toggle="dropdown">
-				<strong><%= branch %></strong> branch <span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu">
-				<li><a class="addAllProductsMenuSel" data-branch="<%= branch %>" href="#"> Add <strong>all</strong> products</a></li>
-				<li class="divider"></li>
-				<li><a class="duplicateAppleBranch" data-branch="<%= branch %>" href="#">Duplicate <strong>Apple direct</strong> branch</a></li>
-				<% _.each(branches, function(dupbranch) { %>
-					<% if (dupbranch != branch) { %>
-					<li><a class="duplicateBranch" href="#" data-branch="<%= branch %>" data-dupbranch="<%= dupbranch %>">Duplicate <strong><%= dupbranch %></strong> branch</a></li>
-					<% } %>
-				<% }) %>
-				<li class="divider"></li>
-				<li><a class="deleteBranchMenuSel" data-branch="<%= branch %>" style="color:red;" href="#"> Delete branch</a></li>
-			</ul>
-		</div>
-		</th>
-	<% }) %>
-</tr>
-</thead>
-<tbody></tbody>
-</script>
-
 <script id="span12-progress-bar" type="text/html">
 <div class="progress progress-striped active">
 	<div class="bar" style="width: 100%;"></div>
@@ -136,19 +120,7 @@
 </td>
 </script>
 
-<script id="update-row" type="text/template">
-<td>
-	<span title="Product ID: <%= id %>" class="info-toggle"><%= title %></span>
-	<% if (depr) { %>
-		<span class="label label-warning">Deprecated</span>
-	<% } %>
-</td>
-<td>
-	<button class="info-toggle-button btn btn-mini"><i class="icon-info-sign"></i></button>
-</td>
-<td><%= version %></td>
-<td><%= PostDate %></td>
-<td>
+<script id="cell-apple-branch" type="text/html">
 <% if (depr) { %>
 	<button disabled class="btn btn-mini disabled">
 		<i class="icon-remove icon-white"></i> Unlisted
@@ -158,44 +130,65 @@
 		<i class="icon-ok icon-white"></i> Listed
 	</button>
 <% } %>
-</td>
+</script>
 
-<% _.each(branches, function(branch) { %>
+<script id="cell-product" type="text/html">
+	<span title="Product ID: <%= id %>" class="info-toggle"><%= title %></span>
+	<% if (depr) { %>
+		<span class="label label-warning">Deprecated</span>
+	<% } %>
+</script>
 
-<td>
-<% if (branch.listed) { %>
-	<% if (branch.queued) { %>
+<script id="cell-header-branch" type="text/html">
+	<div class="btn-group">
+		<button class="btn dropdown-toggle" data-toggle="dropdown">
+			<strong><%= branch %></strong> branch <span class="caret"></span>
+		</button>
+		<ul class="dropdown-menu">
+			<li><a class="addAllProductsMenuSel" data-branch="<%= branch %>" href="#"> Add <strong>all</strong> products</a></li>
+			<li class="divider"></li>
+			<li><a class="duplicateAppleBranch" data-branch="<%= branch %>" href="#">Duplicate <strong>Apple direct</strong> branch</a></li>
+			<% _.each(branches, function(dupbranch) { %>
+				<% if (dupbranch != branch) { %>
+				<li><a class="duplicateBranch" href="#" data-branch="<%= branch %>" data-dupbranch="<%= dupbranch %>">Duplicate <strong><%= dupbranch %></strong> branch</a></li>
+				<% } %>
+			<% }) %>
+			<li class="divider"></li>
+			<li><a class="deleteBranchMenuSel" data-branch="<%= branch %>" style="color:red;" href="#"> Delete branch</a></li>
+		</ul>
+	</div>
+</script>
+
+<script id="cell-branch" type="text/html">
+<% if (_.indexOf(branches, cellBranch) > -1) { %>
+	<% if (_.indexOf(queued, cellBranch) > -1) { %>
 		<button
-			data-branch="<%= branch.name %>"
+			data-branch="<%= cellBranch %>"
 			class="btn btn-mini btn-info button-listed">
 				<i class="icon-minus-sign icon-white"></i> <span>Delisting queued</span>
 		</button>
 	<% } else { %>
 		<button
-			data-branch="<%= branch.name %>"
+			data-branch="<%= cellBranch %>"
 			class="btn btn-mini btn-success button-listed">
 				<i class="icon-ok icon-white"></i> <span>Listed</span>
 		</button>
 	<% } %>
 <% } else { %>
-	<% if (branch.queued) { %>
+	<% if (_.indexOf(queued, cellBranch) > -1) { %>
 		<button
-			data-branch="<%= branch.name %>"
+			data-branch="<%= cellBranch %>"
 			class="btn btn-mini btn-info button-unlisted">
 				<i class="icon-plus-sign icon-white"></i> <span>Listing qeueued</span>
 		</button>
 	<% } else { %>
 		<button
-			data-branch="<%= branch.name %>"
+			data-branch="<%= cellBranch %>"
 			class="btn btn-mini button-unlisted">
 				<i class="icon-remove"></i> <span>Unlisted</span>
 		</button>
 	<% } %>
 <% } %>
-</td>
-
-<% }) %>
-
 </script>
 
 <!-- Includes -->
@@ -205,6 +198,9 @@
 	<script src="static/js/backbone.wreqr.min.js"></script>
 	<script src="static/js/backbone.babysitter.min.js"></script>
 	<script src="static/js/backbone.marionette.min.js"></script>
+	<script src="static/js/backbone-pageable.min.js"></script>
+	<script src="static/js/backgrid.min.js"></script>
+	<script src="static/js/backgrid-paginator.min.js"></script>
 	<script src="static/js/margarita.js"></script>
 	<script src="static/js/bootstrap.min.js"></script>
 </body>

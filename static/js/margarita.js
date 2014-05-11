@@ -26,66 +26,97 @@ var ProductChanges = Backbone.Collection.extend({
 	}
 });
 
-var Branches = Backbone.Collection.extend({
-	model: Backbone.Model,
-	url: 'branches'
+var Product = Backbone.Model.extend({
+	defaults: { queued: [], },
 });
 
-var Products = Backbone.Collection.extend({
-	model: Backbone.Model,
+var Products = Backbone.PageableCollection.extend({
+	model: Product,
 	url: 'products',
+	state: {
+		pageSize: 20,
+	},
+	mode: 'client',
 
 	initialize: function(models, options) {
-		if (typeof(options) == "object" && 'productChanges' in options)
-			this.productChanges = options['productChanges'];
-		else
-			this.productChanges = new ProductChanges();
+		this.productChanges = options.productChanges || new ProductChanges();
 
-		this.bind('sync', this.fetchBranches);
-	},
-
-	fetchBranches: function() {
-		console.log('Products: ' + this.length.toString());
-
-		var this_products = this;
-
-		$.ajax({ url: 'branches', dataType: 'json',	success: function(branches) {
-			this_products.branches = _.pluck(branches, 'name');
-
-			console.log('Branches: ' + branches.length.toString() +
-			            ' (' + this_products.branches.toString() + ')');
-
-			this_products.each(function (prod) {
-				var prodId = prod.get('id');
-				var prodBranches = [];
-
-				_.each(branches, function (branch) {
-					prodBranches.push({
-						name: branch.name,
-						listed: (_.indexOf(branch.products, prodId) != -1),
-						queued: false,
-					});
-				});
-
-				prod.set('branches', prodBranches);
-			});
-
-			this_products.trigger("branchesLoaded");
-		}});
+		this.bind("reset", this.changed, this);
 	},
 
 	parse: function(response) {
-		_.each(response, function (r) {
-			r.queued = false;
-		});
-		return response;
-	}
+		// if we get a new set of data then we're invalidating any previous product changes
+		this.productChanges.reset();
+
+		this.allBranches = response.branches;
+
+		return Backbone.PageableCollection.prototype.parse.apply(this, [response.products]);
+	},
+
+	changed: function() {
+		// attempt to give "cleaner" access to some needed properties
+		// rather than relying on this object being linked to the model all
+		// the time (the collection reference seem to get messed up with
+		// PageableCollection). do this after the "reset" event rather than in
+		// the parse override as we need the models to exist to set the
+		// prototype reference
+		if (this.models.length > 0) {
+			this.models[0].__proto__.allBranches = this.allBranches;
+			this.models[0].__proto__.productChanges = this.productChanges;
+		}
+	},
 });
 
 var FilterCriteria = Backbone.Model.extend({
 	defaults: {
 		hideCommon: true
-	}
+	},
+	initialize: function(options) {
+		this.products = options.products;
+		this.products.bind('sync', this.updated, this);
+		this.bind('change', this.doFilter, this);
+	},
+	updated: function() {
+		console.log('FilterCriteria.updated: cloned fullCollection for filtering');
+		this.shadowCollection = this.products.fullCollection.clone();
+
+		// perform the first filter operation
+		this.doFilter();
+	},
+	productFilter: function(product) {
+		var show = false;
+
+		if (this.get('hideCommon') == false || product.get('depr') == true) {
+			// always show the update if not hiding common updates OR if the update is deprecated
+			show = true;
+		} else {
+			var proddiff = _.difference(product.allBranches, product.get('branches'))
+
+			// if we're not listed in all branches then show the update
+			if (proddiff.length != 0)  show = true;
+		}
+
+		var filterText = this.get('filterText');
+		if (filterText) {
+			var title = product.get('title');
+			if (title.toLowerCase().indexOf(filterText.toLowerCase()) == -1)
+				show = false;
+		}
+
+		return show;
+	},
+	doFilter: function () {
+		console.log('Performing search & filter: Hide common: ' + this.get('hideCommon').toString() + ', text: ' + this.get('filterText'));
+
+		// change to first page of results (problems with small result sets if not done)
+		this.products.getFirstPage({silent: true});
+
+		var filterset = this.shadowCollection.filter(this.productFilter, this);
+
+		console.log('Filter results: ' + filterset.length.toString());
+
+		this.products.fullCollection.reset(filterset, {reindex: false});
+	},
 });
 
 /* Views */
@@ -172,126 +203,44 @@ var NavbarLayout = Backbone.Marionette.Layout.extend({
 	}
 });
 
-var UpdateDescriptionView = Backbone.Marionette.ItemView.extend({
-	tagName: 'tr',
-	template: '#vw-update-description',
-})
+/* BackGrid Views */
 
-var UpdateView = Backbone.Marionette.ItemView.extend({
-	tagName: 'tr',
-	template: '#update-row',
-	events: {
-		'click .button-listed':   'productBranchButtonClick',
-		'click .button-unlisted': 'productBranchButtonClick',
-		'click .info-toggle-button': 'toggleInfo',
-		'click .info-toggle': 'toggleInfo',
+var ProductCell = Backbone.Marionette.ItemView.extend({
+	tagName: 'td',
+	template: '#cell-product',
+	className: "string-cell renderable",
+	initialize: function (options) {
+		// BackGrid cells require the column key
+		_.extend(this, _.pick(options, ['column']));
 	},
-	initialize: function() {
-		this.model.bind('change', this.render, this);
-		this.showInfo = false;
-	},
-	productBranchButtonClick: function (ev) {
-		var prodChanges = this.model.collection.productChanges;
-
-		// pull in a bunch of data to get our bearings.. seems like too much
-		var productId = this.model.get('id')
-		var branchName = $(ev.currentTarget).data('branch'); // which branch did we click on
-		var prodBranches = this.model.get('branches');
-		var branchArrPos = -1;
-		var branch = _.find(prodBranches, function (b) { branchArrPos++; return b.name == branchName; });
-
-		var changeId = branchName + productId;
-
-		if (branch.queued) {
-			prodBranches[branchArrPos].queued = false;
-			prodChanges.remove({id: changeId});
-		} else {
-			prodBranches[branchArrPos].queued = true;
-			prodChanges.add({
-				id: changeId,
-				branch: branch.name,
-				listed: branch.listed,
-				productId: productId
-			});
-		}
-
-		// manually trigger events as we're modifying an array directly
-		this.model.trigger('change');
-		this.model.trigger('change:branches');
-	},
-	toggleInfo: function(ev) {
-		this.showInfo = !this.showInfo;
-		var updateTr = $(ev.currentTarget).closest('tr');
-		var toggleBtn = $(updateTr).find('.info-toggle-button');
-
-		if (!this.updView) {
-			this.updView = new UpdateDescriptionView({model: this.model});
-			this.updView.render();
-		}
-
-		if (this.showInfo) {
-			toggleBtn.addClass('active');
-			updateTr.after(this.updView.el);
-		} else {
-			toggleBtn.removeClass('active');
-			updateTr.next().remove();
-		}
-	}
 });
 
-var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
-	tagName: 'table',
-	className: 'table',
-	template: '#update-table',
-	itemView: UpdateView,
+var AppleBranchCell = Backbone.Marionette.ItemView.extend({
+	tagName: 'td',
+	template: '#cell-apple-branch',
+	className: "string-cell renderable",
+	initialize: function (options) {
+		// BackGrid cells require the column key
+		_.extend(this, _.pick(options, ['column']));
+	},
+});
+
+var BranchHeaderCell = Backbone.Marionette.ItemView.extend({
+	tagName: 'th',
+	template: '#cell-header-branch',
+	className: 'branch-header renderable',
 	events: {
 		'click .addAllProductsMenuSel': 'addAllProducts',
 		'click .deleteBranchMenuSel':   'deleteBranch',
 		'click .duplicateAppleBranch':  'duplicateAppleBranch',
 		'click .duplicateBranch':       'duplicateBranch',
 	},
-	initialize: function() {
-		this.options.filterCriteria.bind('change', this.render, this);
+	initialize: function (options) {
+		// BackGrid cells require the column key
+		_.extend(this, _.pick(options, ['column']));
 	},
-	serializeData: function() {
-		// TODO: this is entirely dependent on Products::fetchBranches at the moment
-		var data = { branches: this.collection.branches };
-
-		return data;
-	},
-	appendHtml: function(collectionView, itemView) {
-		var show = false;
-		var depr = itemView.model.get('depr');
-
-		if (this.options.filterCriteria.get('hideCommon') == false || depr == true) {
-			// always show the update if not hiding common updates OR
-			// if the update is deprecated
-			show = true;
-		} else {
-			var prodBranches = itemView.model.get('branches');
-
-			// this is a little hackish: create an array out of the
-			// "listed" status of each branch, including the "deprecated"
-			// status (on the Apple branch) as one of those statuses
-			var listedArr = _.pluck(prodBranches, 'listed');
-			listedArr.push(!depr);
-
-			if (_.contains(listedArr, false) == true)
-				// show if any branch is unlisted, including
-				// being deprecated (not in "Apple" branch)
-				show = true;
-		}
-
-		var filterText = this.options.filterCriteria.get('filterText');
-		if (filterText) {
-			var title = itemView.model.get('title');
-			if (title.toLowerCase().indexOf(filterText.toLowerCase()) == -1)
-				show = false;
-		}
-
-		if (show == true) {
-			collectionView.$("tbody").append(itemView.el);
-		}
+	serializeData: function () {
+		return {branch: this.branch, branches: this.branches};
 	},
 	addAllProducts: function (ev) {
 		var branch = $(ev.currentTarget).data('branch');
@@ -351,8 +300,115 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	},
 });
 
+var BranchCell = Backbone.Marionette.ItemView.extend({
+	tagName: 'td',
+	template: '#cell-branch',
+	className: 'string-cell renderable',
+	events: {
+		'click button': 'listingButtonClick',
+	},
+	initialize: function (options) {
+		// BackGrid cells require the column key
+		_.extend(this, _.pick(options, ['column']));
+		// save the branch name
+		this.branch = this.column.get('name');
+
+		this.model.bind('change:queued', this.render, this);
+	},
+	serializeData: function(){
+		var data = this.model.toJSON();
+		data.cellBranch = this.branch;
+		return data;
+	},
+	listingButtonClick: function (ev) {
+		ev.preventDefault();
+
+		// retrive the instance of productChanges from our model prototype
+		var prodChanges = this.model.productChanges;
+
+		if (!prodChanges)
+			console.warn('no productChanges');
+
+		var prodId = this.model.get('id');
+		var prodBranches = this.model.get('branches');
+		var branchName = this.branch;
+		var changeId = branchName + prodId;
+
+		if (_.contains(this.model.get('queued'), branchName)) {
+			prodChanges.remove({id: changeId});
+			this.model.set('queued', _.without(this.model.get('queued'), branchName));
+		} else {
+			prodChanges.add({
+				id: changeId,
+				branch: branchName,
+				listed: _.indexOf(prodBranches, branchName) > -1,
+				productId: prodId,
+			});
+			this.model.set('queued', _.union(this.model.get('queued'), [branchName]));
+		}
+	},
+	render: function (opt) {
+		Backbone.Marionette.ItemView.prototype.render.apply(this, opt);
+		// XXX: BackGrid requires this for some reason
+		this.delegateEvents();
+		return this;
+	}
+});
+
+var UpdatesGridColumns = [{
+	name: 'title',
+	label: 'Software Update Product',
+	editable: false,
+	cell: ProductCell,
+}, {
+	name: 'version',
+	label: 'Version',
+	editable: false,
+	cell: 'string',
+}, {
+	name: 'PostDate',
+	label: 'Post Date',
+	editable: false,
+	cell: 'string',
+}, {
+	name: 'depr',
+	label: 'Apple branch',
+	editable: false,
+	cell: AppleBranchCell,
+}];
+
+
+var UpdatesGrid = Backgrid.Grid.extend({
+	className: "backgrid backgrid-striped",
+	initialize: function (options) {
+		// specifically assign a copy of our pre-defined grid columns
+		this.options.columns = UpdatesGridColumns.slice(0);
+
+		var that = this;
+
+		// add a customized column for each branch
+		_.each(options.collection.allBranches, function (i) {
+			that.options.columns.push({
+				name: i,
+				label: i,
+				editable: false,
+				cell: BranchCell,
+				/* let each header know which header it's for and
+				   what other branches there are */
+				headerCell: BranchHeaderCell.extend({
+					branch: i,
+					branches: options.collection.allBranches,
+				}),
+			});
+		});
+
+console.log(this.options.columns);
+
+		Backgrid.Grid.prototype.initialize.call(this, options);
+	},
+});
+
 var ProgressBarView = Backbone.Marionette.ItemView.extend({
-	// className: 'span4 offset4', // smaller progress bar
 	template: '#span12-progress-bar',
 });
 
@@ -379,6 +435,7 @@ var NewBranchFormView = Backbone.View.extend({
 MargaritaApp.addRegions({
 	navbarRegion: "#navbarRegion",
 	updates: '#updates',
+	paginator: '#paginator',
 });
 
 MargaritaApp.on("catalogsChanged", function (options) {
@@ -396,16 +453,21 @@ MargaritaApp.addInitializer(function () {
 
 	MargaritaApp.trigger('catalogsChanging');
 
-	MargaritaApp.filterCriteria = new FilterCriteria();
 	MargaritaApp.productChanges = new ProductChanges();
 	MargaritaApp.products = new Products([], {productChanges: MargaritaApp.productChanges});
+	MargaritaApp.filterCriteria = new FilterCriteria({products: MargaritaApp.products});
 
-	MargaritaApp.products.bind('branchesLoaded', function () {
-		var updateTableView = new UpdatesTableView({
+	MargaritaApp.products.bind('sync', function () {
+		var updatesGrid = new UpdatesGrid({
 			collection: MargaritaApp.products,
-			filterCriteria: MargaritaApp.filterCriteria,
 		});
-		MargaritaApp.updates.show(updateTableView);
+
+		var paginator = new Backgrid.Extension.Paginator({
+			collection: MargaritaApp.products,
+		});
+
+		MargaritaApp.updates.show(updatesGrid);
+		MargaritaApp.paginator.show(paginator);
 	});
 
 	navbar.queuedChangesButton.show(new QueuedChangesButtonView({collection: MargaritaApp.productChanges}));
