@@ -73,11 +73,10 @@ var FilterCriteria = Backbone.Model.extend({
 	},
 	initialize: function(options) {
 		this.products = options.products;
-		this.products.bind('sync', this.updated, this);
+		this.products.bind('sync', this.productsUpdated, this);
 		this.bind('change', this.doFilter, this);
 	},
-	updated: function() {
-		console.log('FilterCriteria.updated: cloned fullCollection for filtering');
+	productsUpdated: function() {
 		this.shadowCollection = this.products.fullCollection.clone();
 
 		// perform the first filter operation
@@ -181,13 +180,9 @@ var SearchBoxView = Backbone.Marionette.ItemView.extend({
 
 		this.searchTimer = window.setTimeout(function() {
 			that.searchTimer = null;
+
 			var filterText = that.$el.find('input').val();
 			
-			if (filterText)
-				console.log('Filtering on "' + filterText + '"');
-			else
-				console.log('No text filtering');
-
 			that.model.set('filterText', filterText);
 		}, 200);
 	},
@@ -401,8 +396,6 @@ var UpdatesGrid = Backgrid.Grid.extend({
 				}),
 			});
 		});
-
-console.log(this.options.columns);
 
 		Backgrid.Grid.prototype.initialize.call(this, options);
 	},
