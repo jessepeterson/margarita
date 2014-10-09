@@ -35,13 +35,10 @@ var Products = Backbone.Collection.extend({
 	model: Backbone.Model,
 	url: 'products',
 
-	initialize: function(models, options) {
-		if (typeof(options) == "object" && 'productChanges' in options)
-			this.productChanges = options['productChanges'];
-		else
-			this.productChanges = new ProductChanges();
+	initialize: function(models, productChanges) {
+		this.productChanges = productChanges || new ProductChanges();
 
-		this.bind('sync', this.fetchBranches);
+		this.bind('reset', this.fetchBranches);
 	},
 
 	fetchBranches: function() {
@@ -84,7 +81,8 @@ var Products = Backbone.Collection.extend({
 
 var FilterCriteria = Backbone.Model.extend({
 	defaults: {
-		hideCommon: true
+		hideCommon: true,
+		hideDeprecated: true
 	}
 });
 
@@ -134,6 +132,22 @@ var ToggleHideCommonButtonView = Backbone.Marionette.ItemView.extend({
 	},
 });
 
+var ToggleHideDeprecatedButtonView = Backbone.Marionette.ItemView.extend({
+	tagName: 'a',
+	attributes: { 'href': '#' },
+	events: { 'click': 'click' },
+	template: '#toggleHideDeprecatedBtnViewTpl',
+	initialize: function() {
+		this.model.bind('change', this.render, this);
+	},
+	click: function(ev) {
+		ev.preventDefault();
+		
+		// toggle the hideDeprecated flag
+		this.model.set('hideDeprecated', !this.model.get('hideDeprecated'));
+	},
+});
+
 var SearchBoxView = Backbone.Marionette.ItemView.extend({
 	template: '#vw-search',
 	events: {
@@ -168,6 +182,7 @@ var NavbarLayout = Backbone.Marionette.Layout.extend({
 	regions: {
 		queuedChangesButton:    "#queuedChangesButtonViewRegion",
 		toggleHideCommonButton: "#toggleHideCommonButtonViewRegion",
+		toggleHideDeprecatedButton: "#toggleHideDeprecatedButtonViewRegion",
 		searchBox: '#rgn-search',
 	}
 });
@@ -246,9 +261,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 	itemView: UpdateView,
 	events: {
 		'click .addAllProductsMenuSel': 'addAllProducts',
-		'click .deleteBranchMenuSel':   'deleteBranch',
-		'click .duplicateAppleBranch':  'duplicateAppleBranch',
-		'click .duplicateBranch':       'duplicateBranch',
+		'click .deleteBranchMenuSel':   'deleteBranch'
 	},
 	initialize: function() {
 		this.options.filterCriteria.bind('change', this.render, this);
@@ -263,11 +276,15 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		var show = false;
 		var depr = itemView.model.get('depr');
 
-		if (this.options.filterCriteria.get('hideCommon') == false || depr == true) {
+		if (this.options.filterCriteria.get('hideDeprecated') == true && depr == true) {
+			show = false;
+		}
+		else if (this.options.filterCriteria.get('hideCommon') == false || depr == true) {
 			// always show the update if not hiding common updates OR
 			// if the update is deprecated
 			show = true;
-		} else {
+		}
+		else {
 			var prodBranches = itemView.model.get('branches');
 
 			// this is a little hackish: create an array out of the
@@ -306,7 +323,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		var branch = $(ev.currentTarget).data('branch');
 
 		if (!confirm('Are you sure you want to delete the branch "' +
-		        branch + '"? Click OK to delete, Cancel otherwise.'))
+		             branch + '"? Click OK to delete, Cancel otherwise.'))
 			return;
 
 		MargaritaApp.trigger("catalogsChanging");
@@ -314,41 +331,7 @@ var UpdatesTableView = Backbone.Marionette.CompositeView.extend({
 		$.post('delete_branch/' + encodeURIComponent(branch), {}, function () {
 			MargaritaApp.trigger("catalogsChanged");
 		});
-	},
-	duplicateAppleBranch: function(ev) {
-		var branch = $(ev.currentTarget).data('branch');
-
-		if (!confirm('Duplicating will overwrite the branch "' + branch + 
-		        '". Are you sure you want to do this? Click OK' + 
-		        ' to duplicate the Apple direct branch, Cancel otherwise.'))
-			return;
-
-		console.log("duplicating apple direct into " + branch);
-
-		MargaritaApp.trigger("catalogsChanging");
-
-		$.post('dup_apple/' + encodeURIComponent(branch), {}, function () {
-			MargaritaApp.trigger("catalogsChanged");
-		});
-
-	},
-	duplicateBranch: function(ev) {
-		var branch = $(ev.currentTarget).data('branch');
-		var dupbranch = $(ev.currentTarget).data('dupbranch');
-
-		if (!confirm('Duplicating will overwrite the branch "' + branch + 
-		        '". Are you sure you want to do this? Click OK' + 
-		        ' to duplicate "' + dupbranch + '", Cancel otherwise.'))
-			return;
-
-		console.log("duplicating " + dupbranch + " into " + branch);
-
-		MargaritaApp.trigger("catalogsChanging");
-
-		$.post('dup/' + encodeURIComponent(dupbranch) + '/' + encodeURIComponent(branch), {}, function () {
-			MargaritaApp.trigger("catalogsChanged");
-		});
-	},
+	}
 });
 
 var ProgressBarView = Backbone.Marionette.ItemView.extend({
@@ -398,7 +381,7 @@ MargaritaApp.addInitializer(function () {
 
 	MargaritaApp.filterCriteria = new FilterCriteria();
 	MargaritaApp.productChanges = new ProductChanges();
-	MargaritaApp.products = new Products([], {productChanges: MargaritaApp.productChanges});
+	MargaritaApp.products = new Products([], MargaritaApp.productChanges);
 
 	MargaritaApp.products.bind('branchesLoaded', function () {
 		var updateTableView = new UpdatesTableView({
@@ -410,6 +393,7 @@ MargaritaApp.addInitializer(function () {
 
 	navbar.queuedChangesButton.show(new QueuedChangesButtonView({collection: MargaritaApp.productChanges}));
 	navbar.toggleHideCommonButton.show(new ToggleHideCommonButtonView({model: MargaritaApp.filterCriteria}));
+	navbar.toggleHideDeprecatedButton.show(new ToggleHideDeprecatedButtonView({model: MargaritaApp.filterCriteria}));
 	navbar.searchBox.show(new SearchBoxView({model: MargaritaApp.filterCriteria}));
 
 	MargaritaApp.trigger('catalogsChanged');
