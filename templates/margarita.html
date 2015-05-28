@@ -58,7 +58,43 @@
 
 </div>
 
+<div class="modal fade" id="rgn-modal-update" tabindex="-1" role="dialog">
+
 <!-- Templates -->
+
+<script id="vw-modal-update" type="text/html">
+<div class="modal-dialog">
+<div class="modal-content">
+	<div class="modal-header">
+		<button type="button" class="close closeAction" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<h4 class="modal-title" title="<%= id %>"><%= title %></h4>
+	</div>
+
+	<div class="modal-body">
+		<p>
+			<% if (depr) { %>
+				<span class="label label-warning">Deprecated</span>
+				<br>
+			<% } %>
+			Product ID:
+			<strong><span style="font-family:monospace"><%= id %></span></strong>
+			<br>
+			Post Date: <%= PostDate %>
+		</p>
+		<hr>
+		<% if (description) { %>
+		<p><%= description %></p>
+		<% } else { %>
+		<p><em>(No description)</em></p>
+		<% } %>
+	</div>
+
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default closeAction">Close</button>
+	</div>
+</div>
+</div>
+</script>
 
 <script id="navbarLayout" type="text/html">
 <div class="navbar navbar-fixed-top navbar-inverse">
@@ -105,21 +141,6 @@
 </div>
 </script>
 
-<script id="vw-update-description" type="text/html">
-<td colspan="<%= branches.length + 5 %>">
-	<div class="well" style="margin:0;">
-		<p><%= description %></p>
-		<hr>
-		<p>
-			<strong>
-				Product ID:
-				<span style="font-family:monospace"><%= id %></span>
-			</strong>
-		</p>
-	</div>
-</td>
-</script>
-
 <script id="cell-apple-branch" type="text/html">
 <% if (depr) { %>
 	<button disabled class="btn btn-mini disabled">
@@ -137,6 +158,7 @@
 	<% if (depr) { %>
 		<span class="label label-warning">Deprecated</span>
 	<% } %>
+	<button class="toggleInfo btn btn-mini"><i class="icon-info-sign"></i></button>
 </script>
 
 <script id="cell-header-branch" type="text/html">

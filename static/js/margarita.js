@@ -118,7 +118,42 @@ var FilterCriteria = Backbone.Model.extend({
 	},
 });
 
+var UpdateModelRegion = Backbone.Marionette.Region.extend({
+	el: "#rgn-modal-update",
+	constructor: function() {
+		Backbone.Marionette.Region.prototype.constructor.apply(this, arguments);
+		this.on("show", this.showModal, this);
+	},
+	getEl: function(selector) {
+		var $el = $(selector);
+		$el.on("hidden", this.close);
+		return $el;
+	},
+	showModal: function(view) {
+		/* this catches the case where this region was closed()ed but the
+		   modal was not hidden. note because close() seems to destroy the
+		   window the nice slideUp effect doesn't show (div is already
+		   destroyed). hence one should use hideModal() when hiding things
+		   from the view. the close() will get called after it's hidden. */
+		view.on("close", this.hideModal, this);
+		this.$el.modal('show');
+	},
+	hideModal: function() {
+		this.$el.modal('hide');
+	}
+})
+
 /* Views */
+
+var UpdateModalView = Backbone.Marionette.ItemView.extend({
+	template: '#vw-modal-update',
+	events: {
+		'click .closeAction': 'closeClicked',
+	},
+	closeClicked: function () {
+		MargaritaApp.updateModal.hideModal();
+	}
+});
 
 var QueuedChangesButtonView = Backbone.Marionette.ItemView.extend({
 	tagName: 'a',
@@ -204,9 +239,18 @@ var ProductCell = Backbone.Marionette.ItemView.extend({
 	tagName: 'td',
 	template: '#cell-product',
 	className: "string-cell renderable",
+	events: {
+		'click .toggleInfo': 'showInfo',
+	},
 	initialize: function (options) {
 		// BackGrid cells require the column key
 		_.extend(this, _.pick(options, ['column']));
+	},
+	showInfo: function (ev) {
+		// TODO: use a single view object? may not be an issue if memory is
+		// free'd after view is closed (by region). to investigate
+		var updModalView = new UpdateModalView({model: this.model});
+		MargaritaApp.updateModal.show(updModalView);
 	},
 });
 
@@ -429,6 +473,7 @@ MargaritaApp.addRegions({
 	navbarRegion: "#navbarRegion",
 	updates: '#updates',
 	paginator: '#paginator',
+	updateModal: UpdateModelRegion,
 });
 
 MargaritaApp.on("catalogsChanged", function (options) {
