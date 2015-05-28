@@ -118,7 +118,7 @@ var FilterCriteria = Backbone.Model.extend({
 	},
 });
 
-var UpdateModelRegion = Backbone.Marionette.Region.extend({
+var UpdateModalRegion = Backbone.Marionette.Region.extend({
 	el: "#rgn-modal-update",
 	constructor: function() {
 		Backbone.Marionette.Region.prototype.constructor.apply(this, arguments);
@@ -473,7 +473,7 @@ MargaritaApp.addRegions({
 	navbarRegion: "#navbarRegion",
 	updates: '#updates',
 	paginator: '#paginator',
-	updateModal: UpdateModelRegion,
+	updateModal: UpdateModalRegion,
 });
 
 MargaritaApp.on("catalogsChanged", function (options) {
