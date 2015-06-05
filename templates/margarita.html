@@ -21,6 +21,9 @@
 		#paginator {
 			margin-bottom: 1em;
 		}
+		a.toggle-info {
+			color:black;
+		}
 	</style>
 	<link href="static/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="static/css/backgrid.min.css" rel="stylesheet" />
@@ -154,11 +157,11 @@
 </script>
 
 <script id="cell-product" type="text/html">
-	<span title="Product ID: <%= id %>" class="info-toggle"><%= title %></span>
+	<a href="#" class="toggle-info" title="Product ID: <%= id %>"><%= title %></a>
 	<% if (depr) { %>
 		<span class="label label-warning">Deprecated</span>
 	<% } %>
-	<button class="toggleInfo btn btn-mini"><i class="icon-info-sign"></i></button>
+	<button class="toggle-info btn btn-mini" style="float:right;"><i class="icon-info-sign"></i></button>
 </script>
 
 <script id="cell-header-branch" type="text/html">

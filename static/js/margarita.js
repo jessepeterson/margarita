@@ -240,13 +240,14 @@ var ProductCell = Backbone.Marionette.ItemView.extend({
 	template: '#cell-product',
 	className: "string-cell renderable",
 	events: {
-		'click .toggleInfo': 'showInfo',
+		'click .toggle-info': 'showInfo',
 	},
 	initialize: function (options) {
 		// BackGrid cells require the column key
 		_.extend(this, _.pick(options, ['column']));
 	},
 	showInfo: function (ev) {
+		ev.preventDefault();
 		// TODO: use a single view object? may not be an issue if memory is
 		// free'd after view is closed (by region). to investigate
 		var updModalView = new UpdateModalView({model: this.model});
