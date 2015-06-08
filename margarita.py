@@ -27,12 +27,7 @@ def list_branches():
 	'''Returns catalog branch names and associated updates'''
 	catalog_branches = reposadocommon.getCatalogBranches()
 
-	# reorganize the updates into an array of branches
-	branches = []
-	for branch in catalog_branches.keys():
-		branches.append({'name': branch, 'products': catalog_branches[branch]})
-
-	return json_response(branches)
+	return json_response(catalog_branches.keys())
 
 def get_description_content(html):
 	if len(html) == 0:
@@ -72,23 +67,32 @@ def get_description_content(html):
 @app.route('/products', methods=['GET'])
 def products():
 	products = reposadocommon.getProductInfo()
+	catalog_branches = reposadocommon.getCatalogBranches()
+
 	prodlist = []
 	for prodid in products.keys():
 		if 'title' in products[prodid] and 'version' in products[prodid] and 'PostDate' in products[prodid]:
-			prodlist.append({
+			prod = {
 				'title': products[prodid]['title'],
 				'version': products[prodid]['version'],
 				'PostDate': products[prodid]['PostDate'].strftime('%Y-%m-%d'),
 				'description': get_description_content(products[prodid]['description']),
 				'id': prodid,
 				'depr': len(products[prodid].get('AppleCatalogs', [])) < 1,
-				})
+				'branches': []
+				}
+
+			for branch in catalog_branches.keys():
+				if prodid in catalog_branches[branch]:
+					prod['branches'].append(branch)
+
+			prodlist.append(prod)
 		else:
 			print 'Invalid update!'
 
 	sprodlist = sorted(prodlist, key=itemgetter('PostDate'), reverse=True)
 
-	return json_response(sprodlist)
+	return json_response({'products': sprodlist, 'branches': catalog_branches.keys()})
 
 @app.route('/new_branch/<branchname>', methods=['POST'])
 def new_branch(branchname):

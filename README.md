@@ -5,7 +5,7 @@ Margarita is a web interface to [reposado](http://github.com/wdas/reposado) the 
 
 Margarita attempts to be an easy to use and quick interface to list or delist update products in branch catalogs per the usual reposado catalog management concepts.
 
-![Screenshot](http://i.imgur.com/fmLcg.png)
+![Screenshot](https://i.imgur.com/5dwSxwS.png)
 
 Requirements
 ------------
