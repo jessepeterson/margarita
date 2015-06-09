@@ -11,8 +11,33 @@ except ImportError:
 	import simplejson as json
 import getopt
 from operator import itemgetter
+from distutils.version import LooseVersion
 
 from reposadolib import reposadocommon
+
+apple_catalog_version_map = {
+	'http://swscan.apple.com/content/catalogs/others/index-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.10',
+	'http://swscan.apple.com/content/catalogs/others/index-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.9',
+	'http://swscan.apple.com/content/catalogs/others/index-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.8',
+	'http://swscan.apple.com/content/catalogs/others/index-lion-snowleopard-leopard.merged-1.sucatalog': '10.7',
+	'http://swscan.apple.com/content/catalogs/others/index-leopard-snowleopard.merged-1.sucatalog': '10.6',
+	'http://swscan.apple.com/content/catalogs/others/index-leopard.merged-1.sucatalog': '10.5',
+	'http://swscan.apple.com/content/catalogs/index-1.sucatalog': '10.4',
+	'http://swscan.apple.com/content/catalogs/index.sucatalog': '10.4',
+}
+
+# cache the keys of the catalog version map dict
+apple_catalog_suffixes = apple_catalog_version_map.keys()
+
+def versions_from_catalogs(cats):
+	'''Given an iterable of catalogs return the corresponding OS X versions'''
+	versions = set()
+
+	for c in cats:
+		if c in apple_catalog_suffixes:
+			versions.add(apple_catalog_version_map[c])
+
+	return versions
 
 def json_response(r):
 	'''Glue for wrapping raw JSON responses'''
@@ -79,7 +104,8 @@ def products():
 				'description': get_description_content(products[prodid]['description']),
 				'id': prodid,
 				'depr': len(products[prodid].get('AppleCatalogs', [])) < 1,
-				'branches': []
+				'branches': [],
+				'oscatalogs': sorted(versions_from_catalogs(products[prodid].get('OriginalAppleCatalogs')), key=LooseVersion, reverse=True),
 				}
 
 			for branch in catalog_branches.keys():

@@ -79,6 +79,10 @@
 				<span class="label label-warning">Deprecated</span>
 				<br>
 			<% } %>
+			<% _.each(oscatalogs, function(osver) { %>
+				<span class="label label-info"><%= osver %></span>
+			<% }) %>
+			<br>
 			Product ID:
 			<strong><span style="font-family:monospace"><%= id %></span></strong>
 			<br>
@@ -160,6 +164,15 @@
 	<a href="#" class="toggle-info" title="Product ID: <%= id %>"><%= title %></a>
 	<% if (depr) { %>
 		<span class="label label-warning">Deprecated</span>
+	<% } %>
+	<% if (oscatalogs.length > 2) { %>
+		<span class="label label-info"><%= oscatalogs[0] %></span>
+		&mdash;
+		<span class="label label-info"><%= oscatalogs[oscatalogs.length - 1] %></span>
+	<% } else { %>
+		<% _.each(oscatalogs, function(osver) { %>
+			<span class="label label-info"><%= osver %></span>
+		<% }) %>
 	<% } %>
 	<button class="toggle-info btn btn-mini" style="float:right;"><i class="icon-info-sign"></i></button>
 </script>
