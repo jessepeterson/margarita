@@ -395,6 +395,37 @@ var BranchCell = Backbone.Marionette.ItemView.extend({
 	}
 });
 
+var UpdatesGridFooter = Backbone.Marionette.ItemView.extend({
+	tagName: 'tfoot',
+	template: '#vw-grid-footer',
+
+	initialize: function (options) {
+		this.columns = options.columns;
+		if (!(this.columns instanceof Backbone.Collection)) {
+			this.columns = new Backgrid.Columns(this.columns);
+		}
+
+		// XXX: yuck! shouldn't need to appeal to the top-level MargaritaApp
+
+		// render when different filter criteria has been selected
+		MargaritaApp.filterCriteria.bind('change', this.render);
+		// render when a different table page is selected
+		MargaritaApp.products.bind('reset', this.render);
+	},
+	serializeData: function() {
+		// XXX: yuck! shouldn't need to appeal to the top-level MargaritaApp
+
+		var serData = {
+			total: MargaritaApp.filterCriteria.shadowCollection.length,
+			showing: MargaritaApp.filterCriteria.products.fullCollection.length,
+			page: MargaritaApp.filterCriteria.products.length,
+			// required to set the colspan of the td within the tfoot element
+			colspan: this.columns.length,
+		};
+		return serData;
+	}
+});
+
 var UpdatesGridColumns = [{
 	name: 'title',
 	label: 'Software Update Product',
@@ -444,6 +475,7 @@ var UpdatesGrid = Backgrid.Grid.extend({
 
 		Backgrid.Grid.prototype.initialize.call(this, options);
 	},
+	footer: UpdatesGridFooter,
 });
 
 var ProgressBarView = Backbone.Marionette.ItemView.extend({

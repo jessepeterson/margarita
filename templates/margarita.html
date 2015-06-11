@@ -37,6 +37,9 @@
 		.backgrid th.branch-header {
 			overflow: visible;
 		}
+		#vw-grid-footer-td {
+			text-align:center;
+		}
 	</style>
 
 
@@ -235,6 +238,19 @@
 		</button>
 	<% } %>
 <% } %>
+</script>
+
+<script id="vw-grid-footer" type="text/html">
+<tr>
+	<td id="vw-grid-footer-td" class="renderable" colspan="<%= colspan %>">
+		<span title="Showing <%= page %> updates on this page of <%= showing %> updates in this list of <%= total %> total updates">
+			Showing <%= showing %> of <%= total %> updates
+			<% if (showing < 1 && total >= 1) { %>
+				<strong>(common updates likely hidden and/or no branches exist)</strong>
+			<% } %>
+		</span>
+	</td>
+</tr>
 </script>
 
 <!-- Includes -->
