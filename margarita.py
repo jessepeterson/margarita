@@ -16,15 +16,15 @@ from distutils.version import LooseVersion
 from reposadolib import reposadocommon
 
 apple_catalog_version_map = {
-	'http://swscan.apple.com/content/catalogs/others/index-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.11',
-	'http://swscan.apple.com/content/catalogs/others/index-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.10',
-	'http://swscan.apple.com/content/catalogs/others/index-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.9',
-	'http://swscan.apple.com/content/catalogs/others/index-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.8',
-	'http://swscan.apple.com/content/catalogs/others/index-lion-snowleopard-leopard.merged-1.sucatalog': '10.7',
-	'http://swscan.apple.com/content/catalogs/others/index-leopard-snowleopard.merged-1.sucatalog': '10.6',
-	'http://swscan.apple.com/content/catalogs/others/index-leopard.merged-1.sucatalog': '10.5',
-	'http://swscan.apple.com/content/catalogs/index-1.sucatalog': '10.4',
-	'http://swscan.apple.com/content/catalogs/index.sucatalog': '10.4',
+	'index-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.11',
+	'index-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.10',
+	'index-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.9',
+	'index-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.8',
+	'index-lion-snowleopard-leopard.merged-1.sucatalog': '10.7',
+	'index-leopard-snowleopard.merged-1.sucatalog': '10.6',
+	'index-leopard.merged-1.sucatalog': '10.5',
+	'index-1.sucatalog': '10.4',
+	'index.sucatalog': '10.4',
 }
 
 # cache the keys of the catalog version map dict
@@ -35,8 +35,9 @@ def versions_from_catalogs(cats):
 	versions = set()
 
 	for c in cats:
-		if c in apple_catalog_suffixes:
-			versions.add(apple_catalog_version_map[c])
+		f = os.path.basename(c)
+		if f in apple_catalog_suffixes:
+			versions.add(apple_catalog_version_map[f])
 
 	return versions
 
