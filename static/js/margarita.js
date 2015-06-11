@@ -518,6 +518,13 @@ MargaritaApp.addInitializer(function () {
 	var newBranchFormView = new NewBranchFormView({el: $('#newbranch')});
 });
 
+function datasize (bytes) {
+	var units = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
+	if (bytes == 0) return '0 ' + units[0];
+	var e = Math.floor(Math.log(bytes) / Math.log(1024));
+	return (bytes / Math.pow(1024, e)).toFixed(1) + ' ' + units[e];
+}
+
 /* Init */
 
 $(document).ready(function () {

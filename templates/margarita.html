@@ -87,6 +87,14 @@
 			<strong><span style="font-family:monospace"><%= id %></span></strong>
 			<br>
 			Post Date: <%= PostDate %>
+			<br>
+			<% _.each(packages, function(pkg) { %>
+				<a class="btn btn-mini btn-success" href="<%= pkg.url %>">
+					<span class="icon-white icon-download"></span>
+					<%= pkg.url.substring(pkg.url.lastIndexOf('/') + 1) %>
+					(<%= datasize(pkg.size) %>)
+				</a>
+			<% }) %>
 		</p>
 		<hr>
 		<% if (description) { %>

@@ -90,6 +90,22 @@ def get_description_content(html):
 
 	return html[startloc:endloc]
 
+def product_urls(cat_entry):
+	'''Retreive package URLs for a given reposado product CatalogEntry.
+
+	Will rewrite URLs to be served from local reposado repo if necessary.'''
+
+	packages = cat_entry.get('Packages', [])
+
+	pkg_urls = []
+	for package in packages:
+		pkg_urls.append({
+			'url': reposadocommon.rewriteOneURL(package['URL']),
+			'size': package['Size'],
+			})
+
+	return pkg_urls
+
 @app.route('/products', methods=['GET'])
 def products():
 	products = reposadocommon.getProductInfo()
@@ -107,6 +123,7 @@ def products():
 				'depr': len(products[prodid].get('AppleCatalogs', [])) < 1,
 				'branches': [],
 				'oscatalogs': sorted(versions_from_catalogs(products[prodid].get('OriginalAppleCatalogs')), key=LooseVersion, reverse=True),
+				'packages': product_urls(products[prodid]['CatalogEntry']),
 				}
 
 			for branch in catalog_branches.keys():
