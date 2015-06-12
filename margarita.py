@@ -34,10 +34,11 @@ def versions_from_catalogs(cats):
 	'''Given an iterable of catalogs return the corresponding OS X versions'''
 	versions = set()
 
-	for c in cats:
-		f = os.path.basename(c)
-		if f in apple_catalog_suffixes:
-			versions.add(apple_catalog_version_map[f])
+	for cat in cats:
+		# take the last portion of the catalog URL path
+		short_cat = cat.split('/')[-1]
+		if short_cat in apple_catalog_suffixes:
+			versions.add(apple_catalog_version_map[short_cat])
 
 	return versions
 
