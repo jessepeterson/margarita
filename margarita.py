@@ -227,7 +227,7 @@ def dup_apple(branchname):
 		print 'No branch ' + branchname
 		return jsonify(result=False)
 
-	# generate list of (non-drepcated) updates
+	# generate list of (non-deprecated) updates
 	products = reposadocommon.getProductInfo()
 	prodlist = []
 	for prodid in products.keys():
