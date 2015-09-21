@@ -48,7 +48,7 @@ Installation
 
 Create symlinks:
 
-    cd /path/to/margaraita-install
+    cd /path/to/margarita-install
 
     # may be optional depending on reposado installation
     ln -s /path/to/reposado-git-clone/code/reposadolib .
