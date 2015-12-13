@@ -79,7 +79,7 @@
 	<div class="modal-body">
 		<p>
 			<% if (depr) { %>
-				<span class="label label-warning">Deprecated</span>
+				<span title="Deprecated update product" class="label label-warning">Deprecated</span>
 				<br>
 			<% } %>
 			<% _.each(oscatalogs, function(osver) { %>
@@ -193,7 +193,7 @@
 <script id="cell-product" type="text/html">
 	<a href="#" class="toggle-info" title="Product ID: <%= id %>"><%= title %></a>
 	<% if (depr) { %>
-		<span class="label label-warning">D</span>
+		<span title="Deprecated update product" class="label label-warning">D</span>
 	<% } %>
 	<% if (oscatalogs.length > 2) { %>
 		<span class="label label-info"><%= oscatalogs[0] %></span>
