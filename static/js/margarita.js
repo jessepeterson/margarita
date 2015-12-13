@@ -27,7 +27,26 @@ var ProductChanges = Backbone.Collection.extend({
 });
 
 var Product = Backbone.Model.extend({
-	defaults: { queued: [], },
+	defaults: { queued: [], configdata: null, fetchingconfig: false },
+	removeConfigData: function () {
+		if (!this.get('configdata'))
+		{
+			console.log("no configdata to remove for " + this.get('id'));
+			return;
+		}
+
+		this.set({'fetchingconfig': true});
+
+		that = this;
+
+		$.ajax({
+			type: 'POST',
+			url: 'remove_config_data/' + this.get('id'),
+			success: function(result) {
+				that.set({'fetchingconfig': false, 'configdata': false});
+			}
+		});
+	}
 });
 
 var Products = Backbone.PageableCollection.extend({
@@ -64,6 +83,40 @@ var Products = Backbone.PageableCollection.extend({
 			this.models[0].__proto__.allBranches = this.allBranches;
 			this.models[0].__proto__.productChanges = this.productChanges;
 		}
+
+		var prod_ids_to_check = [];
+		_.each(this.models, function(model) {
+			if (!model.get('fetchingconfig') && model.get('configdata') == null) {
+				prod_ids_to_check.push(model.get('id'));
+				model.set('fetchingconfig', true);
+			}
+		});
+
+		if (prod_ids_to_check.length < 1)
+		{
+			return;
+		}
+
+		console.log('checking', prod_ids_to_check.length, 'products for config-data')
+
+		$.ajax({
+			type: 'POST',
+			url: 'config_data',
+			data: JSON.stringify(prod_ids_to_check),
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8',
+			success: function(result) {
+				console.log('results for', _.keys(result).length, 'products for config-data')
+				_.each(_.keys(result), function(prod_id) {
+					// the filterCriteria object is the only object which has
+					// the complete unfiltered set of updates from reposado
+					// this model object only has the filtered and paginated
+					// results
+					var myModel = MargaritaApp.filterCriteria.shadowCollection.get(prod_id);
+					myModel.set({'fetchingconfig': false, 'configdata': result[prod_id]});
+				});
+			}
+		});
 	},
 });
 
@@ -149,9 +202,16 @@ var UpdateModalView = Backbone.Marionette.ItemView.extend({
 	template: '#vw-modal-update',
 	events: {
 		'click .closeAction': 'closeClicked',
+		'click .removeConfigDataAction': 'removeConfigData',
+	},
+	initialize: function() {
+		this.model.bind('change', this.render, this);
 	},
 	closeClicked: function () {
 		MargaritaApp.updateModal.hideModal();
+	},
+	removeConfigData: function () {
+		this.model.removeConfigData();
 	}
 });
 

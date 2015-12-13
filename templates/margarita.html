@@ -91,6 +91,25 @@
 			<br>
 			Post Date: <%= PostDate %>
 			<br>
+			Config-Data:
+			<% if (fetchingconfig == true) { %>
+				<em>Checking...</em>
+			<% } else { %>
+				<% if (configdata == true) { %>
+					<span class="label label-warning">Yes</span>
+					&mdash;
+					<button type="button" class="btn btn-mini btn-danger removeConfigDataAction">
+						<span class="icon-white icon-remove"></span>
+						Remove
+					</button>
+				<% } else if (configdata == false) { %>
+					<span class="label label-info">No</span>
+				<% } else { %>
+					<em>Unknown</em>
+				<% } %>
+			<% } %>
+			<br>
+			<br>
 			<% _.each(packages, function(pkg) { %>
 				<a class="btn btn-mini btn-success" href="<%= pkg.url %>">
 					<span class="icon-white icon-download"></span>

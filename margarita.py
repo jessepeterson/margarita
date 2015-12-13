@@ -258,12 +258,40 @@ def dup(frombranch, tobranch):
 
 	return jsonify(result=True)
 
+@app.route('/config_data', methods=['POST'])
+def config_data():
+	# catalog_branches = reposadocommon.getCatalogBranches()
+	check_prods = request.json
+
+	if len(check_prods) > 0:
+		cd_prods = reposadocommon.check_or_remove_config_data_attribute(check_prods)
+	else:
+		cd_prods = []
+
+	response_prods = {}
+	for prod_id in check_prods:
+		response_prods.update({prod_id: True if prod_id in cd_prods else False})
+
+	print response_prods
+
+	return json_response(response_prods)
+
+@app.route('/remove_config_data/<product>', methods=['POST'])
+def remove_config_data(product):
+	# catalog_branches = reposadocommon.getCatalogBranches()
+	check_prods = request.json
+
+	products = reposadocommon.check_or_remove_config_data_attribute([product, ], remove_attr=True)
+
+	return json_response(products)
+
 def main():
 	optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
 
 	flaskargs = {}
 	flaskargs['host'] = '0.0.0.0'
 	flaskargs['port'] = 8089
+	flaskargs['threaded'] = True
 	
 	for o, a in optlist:
 		if o == '-d':
