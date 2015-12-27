@@ -542,7 +542,7 @@ var ProgressBarView = Backbone.Marionette.ItemView.extend({
 	template: '#span12-progress-bar',
 });
 
-var NewBranchFormView = Backbone.View.extend({
+var FooterView = Backbone.View.extend({
 	events: {
 		'click #newbranchbtn': 'newBranch',
 		'click #reposyncbtn': 'repoSync',
@@ -613,7 +613,7 @@ MargaritaApp.addInitializer(function () {
 
 	MargaritaApp.trigger('catalogsChanged');
 
-	var newBranchFormView = new NewBranchFormView({el: $('#newbranch')});
+	var footerView = new FooterView({el: $('#newbranch')});
 });
 
 function datasize (bytes) {
