@@ -542,19 +542,37 @@ var ProgressBarView = Backbone.Marionette.ItemView.extend({
 	template: '#span12-progress-bar',
 });
 
+var RepoSyncFormView = Backbone.View.extend({
+	events: {
+		'click #reposyncbtn': 'repoSync',
+	},
+	repoSync: function () {
+		MargaritaApp.trigger("catalogsChanging");
+		$.post('repo_sync', {}, function () {
+			MargaritaApp.trigger("catalogsChanged");
+		});
+	}
+});
+
 var NewBranchFormView = Backbone.View.extend({
 	events: {
-		'click button': 'newBranch'
+		'click #newbranchbtn': 'newBranch',
+		'click #reposyncbtn': 'repoSync',
 	},
 	newBranch: function () {
 		var newBranchInput = $('#branchname', this.el);
 
 		MargaritaApp.trigger("catalogsChanging");
 
-		// TODO: consider using an actual Backbone.Model instead
 		// of a direct jQuery post method
 		$.post('new_branch/' + encodeURIComponent(newBranchInput.val()), {}, function () {
 			newBranchInput.val('');
+			MargaritaApp.trigger("catalogsChanged");
+		});
+	},
+	repoSync: function () {
+		MargaritaApp.trigger("catalogsChanging");
+		$.post('repo_sync', {}, function () {
 			MargaritaApp.trigger("catalogsChanged");
 		});
 	}
@@ -608,6 +626,8 @@ MargaritaApp.addInitializer(function () {
 	MargaritaApp.trigger('catalogsChanged');
 
 	var newBranchFormView = new NewBranchFormView({el: $('#newbranch')});
+    var newRepoSyncFormView = new RepoSyncFormView({el: $('#reposyncbtn')});
+
 });
 
 function datasize (bytes) {
