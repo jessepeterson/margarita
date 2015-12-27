@@ -542,18 +542,6 @@ var ProgressBarView = Backbone.Marionette.ItemView.extend({
 	template: '#span12-progress-bar',
 });
 
-var RepoSyncFormView = Backbone.View.extend({
-	events: {
-		'click #reposyncbtn': 'repoSync',
-	},
-	repoSync: function () {
-		MargaritaApp.trigger("catalogsChanging");
-		$.post('repo_sync', {}, function () {
-			MargaritaApp.trigger("catalogsChanged");
-		});
-	}
-});
-
 var NewBranchFormView = Backbone.View.extend({
 	events: {
 		'click #newbranchbtn': 'newBranch',
@@ -626,8 +614,6 @@ MargaritaApp.addInitializer(function () {
 	MargaritaApp.trigger('catalogsChanged');
 
 	var newBranchFormView = new NewBranchFormView({el: $('#newbranch')});
-    var newRepoSyncFormView = new RepoSyncFormView({el: $('#reposyncbtn')});
-
 });
 
 function datasize (bytes) {
