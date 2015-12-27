@@ -1,19 +1,23 @@
+import os
+import sys
+import getopt
+import repo_sync
+
 from flask import Flask
 from flask import jsonify, render_template, redirect
 from flask import request, Response
+from operator import itemgetter
+from distutils.version import LooseVersion
+from reposadolib import reposadocommon
+
 app = Flask(__name__)
 
-import os, sys
 try:
     import json
 except ImportError:
     # couldn't find json, try simplejson library
     import simplejson as json
-import getopt
-from operator import itemgetter
-from distutils.version import LooseVersion
 
-from reposadolib import reposadocommon
 
 apple_catalog_version_map = {
     'index-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog': '10.11',
@@ -30,6 +34,7 @@ apple_catalog_version_map = {
 # cache the keys of the catalog version map dict
 apple_catalog_suffixes = apple_catalog_version_map.keys()
 
+
 def versions_from_catalogs(cats):
     '''Given an iterable of catalogs return the corresponding OS X versions'''
     versions = set()
@@ -42,13 +47,16 @@ def versions_from_catalogs(cats):
 
     return versions
 
+
 def json_response(r):
     '''Glue for wrapping raw JSON responses'''
     return Response(json.dumps(r), status=200, mimetype='application/json')
 
+
 @app.route('/')
 def index():
     return render_template('margarita.html')
+
 
 @app.route('/branches', methods=['GET'])
 def list_branches():
@@ -56,6 +64,7 @@ def list_branches():
     catalog_branches = reposadocommon.getCatalogBranches()
 
     return json_response(catalog_branches.keys())
+
 
 def get_description_content(html):
     if len(html) == 0:
@@ -75,7 +84,7 @@ def get_description_content(html):
         startloc = lwrhtml.find('<' + celem)
 
         if startloc != -1:
-            startloc += 6 # length of <body>
+            startloc += 6  # length of <body>
 
     if startloc == -1:
         # no <p> nor <body> tags. bail.
@@ -92,6 +101,7 @@ def get_description_content(html):
 
     return html[startloc:endloc]
 
+
 def product_urls(cat_entry):
     '''Retreive package URLs for a given reposado product CatalogEntry.
 
@@ -107,6 +117,7 @@ def product_urls(cat_entry):
             })
 
     return pkg_urls
+
 
 @app.route('/products', methods=['GET'])
 def products():
@@ -140,6 +151,7 @@ def products():
 
     return json_response({'products': sprodlist, 'branches': catalog_branches.keys()})
 
+
 @app.route('/new_branch/<branchname>', methods=['POST'])
 def new_branch(branchname):
     catalog_branches = reposadocommon.getCatalogBranches()
@@ -148,8 +160,15 @@ def new_branch(branchname):
         abort(401)
     catalog_branches[branchname] = []
     reposadocommon.writeCatalogBranches(catalog_branches)
-    
+
     return jsonify(result='success')
+
+
+@app.route('/repo_sync', methods=['POST'])
+def call_repo_sync():
+    repo_sync.main()
+    return jsonify(result='success')
+
 
 @app.route('/delete_branch/<branchname>', methods=['POST'])
 def delete_branch(branchname):
@@ -174,19 +193,20 @@ def delete_branch(branchname):
             os.remove(branchcatalogpath)
 
     reposadocommon.writeCatalogBranches(catalog_branches)
-    
-    return jsonify(result=True);
+
+    return jsonify(result=True)
+
 
 @app.route('/add_all/<branchname>', methods=['POST'])
 def add_all(branchname):
     products = reposadocommon.getProductInfo()
     catalog_branches = reposadocommon.getCatalogBranches()
-    
+
     catalog_branches[branchname] = products.keys()
 
     reposadocommon.writeCatalogBranches(catalog_branches)
     reposadocommon.writeAllBranchCatalogs()
-    
+
     return jsonify(result=True)
 
 
@@ -201,7 +221,7 @@ def process_queue():
         if branch not in catalog_branches.keys():
             print 'No such catalog'
             continue
-        
+
         if change['listed']:
             # if this change /was/ listed, then unlist it
             if prodId in catalog_branches[branch]:
@@ -218,6 +238,7 @@ def process_queue():
     reposadocommon.writeAllBranchCatalogs()
 
     return jsonify(result=True)
+
 
 @app.route('/dup_apple/<branchname>', methods=['POST'])
 def dup_apple(branchname):
@@ -242,6 +263,7 @@ def dup_apple(branchname):
 
     return jsonify(result=True)
 
+
 @app.route('/dup/<frombranch>/<tobranch>', methods=['POST'])
 def dup(frombranch, tobranch):
     catalog_branches = reposadocommon.getCatalogBranches()
@@ -257,6 +279,7 @@ def dup(frombranch, tobranch):
     reposadocommon.writeAllBranchCatalogs()
 
     return jsonify(result=True)
+
 
 @app.route('/config_data', methods=['POST'])
 def config_data():
@@ -276,6 +299,7 @@ def config_data():
 
     return json_response(response_prods)
 
+
 @app.route('/remove_config_data/<product>', methods=['POST'])
 def remove_config_data(product):
     # catalog_branches = reposadocommon.getCatalogBranches()
@@ -285,6 +309,7 @@ def remove_config_data(product):
 
     return json_response(products)
 
+
 def main():
     optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
 
@@ -292,7 +317,7 @@ def main():
     flaskargs['host'] = '0.0.0.0'
     flaskargs['port'] = 8089
     flaskargs['threaded'] = True
-    
+
     for o, a in optlist:
         if o == '-d':
             flaskargs['debug'] = True
@@ -300,7 +325,7 @@ def main():
             flaskargs['host'] = a
         elif o == '-p':
             flaskargs['port'] = int(a)
-    
+
     app.run(**flaskargs)
 
 if __name__ == '__main__':
