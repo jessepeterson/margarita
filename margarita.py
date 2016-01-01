@@ -170,7 +170,8 @@ def call_repo_sync():
         download_packages = False
     else:
         download_packages = True
-    repo_sync.sync(fast_scan=True, download_packages)
+    fast_scan = True
+    repo_sync.sync(fast_scan, download_packages)
     return jsonify(result='success')
 
 
