@@ -334,6 +334,7 @@ var BranchHeaderCell = Backbone.Marionette.ItemView.extend({
 		'click .deleteBranchMenuSel':   'deleteBranch',
 		'click .duplicateAppleBranch':  'duplicateAppleBranch',
 		'click .duplicateBranch':       'duplicateBranch',
+		'click .removeAllProductsMenuSel': 'removeAllProducts'
 	},
 	initialize: function (options) {
 		// BackGrid cells require the column key
@@ -348,6 +349,15 @@ var BranchHeaderCell = Backbone.Marionette.ItemView.extend({
 		MargaritaApp.trigger("catalogsChanging");
 
 		$.post('add_all/' + encodeURIComponent(branch), {}, function () {
+			MargaritaApp.trigger("catalogsChanged");
+		});
+	},
+	removeAllProducts: function (ev) {
+		var branch = $(ev.currentTarget).data('branch');
+
+		MargaritaApp.trigger("catalogsChanging");
+
+		$.post('remove_all/' + encodeURIComponent(branch), {}, function () {
 			MargaritaApp.trigger("catalogsChanged");
 		});
 	},
