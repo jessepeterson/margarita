@@ -166,7 +166,11 @@ def new_branch(branchname):
 
 @app.route('/repo_sync', methods=['POST'])
 def call_repo_sync():
-    repo_sync.main()
+    if not reposadocommon.pref('LocalCatalogURLBase'):
+        download_packages = False
+    else:
+        download_packages = True
+    repo_sync.sync(fast_scan=True, download_packages)
     return jsonify(result='success')
 
 
