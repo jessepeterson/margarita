@@ -305,6 +305,7 @@ var ProductCell = Backbone.Marionette.ItemView.extend({
 	initialize: function (options) {
 		// BackGrid cells require the column key
 		_.extend(this, _.pick(options, ['column']));
+		this.model.bind('change:configdata', this.render, this);
 	},
 	showInfo: function (ev) {
 		ev.preventDefault();
