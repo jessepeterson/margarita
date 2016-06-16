@@ -57,9 +57,11 @@
 	<div id="updates"></div>
 	<div id="paginator"></div>
 
-	<div id="newbranch" style="text-align:right;" class="well form-inline">
-		<input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
-		<button id="newbranchbtn" class="btn btn-primary">Create New Branch</button>
+	<div id="newbranch" class="well form-inline">
+		<button id="reposyncbtn" class="btn btn-primary">Repo Sync</button>
+		<label class="checkbox"><input type="checkbox" name="syncrecheck" id="syncrecheck" value="">Recheck</label>
+		<span style="float:right;"><input type="text" id="branchname" class="input-medium" placeholder="New branch name...">
+		<button id="newbranchbtn" class="btn btn-primary">Create New Branch</button></span>
 	</div>
 
 </div>
@@ -224,6 +226,8 @@
 				<li><a class="duplicateBranch" href="#" data-branch="<%= branch %>" data-dupbranch="<%= dupbranch %>">Duplicate <strong><%= dupbranch %></strong> branch</a></li>
 				<% } %>
 			<% }) %>
+			<li class="divider"></li>
+			<li><a class="removeAllProductsMenuSel" data-branch="<%= branch %>" href="#">Remove <strong>all</strong> products</a></li>
 			<li class="divider"></li>
 			<li><a class="deleteBranchMenuSel" data-branch="<%= branch %>" style="color:red;" href="#"> Delete branch</a></li>
 		</ul>
