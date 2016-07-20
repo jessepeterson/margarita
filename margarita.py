@@ -265,7 +265,7 @@ def config_data():
 	check_prods = request.json
 
 	if len(check_prods) > 0:
-		cd_prods = reposadocommon.check_or_remove_config_data_attribute(check_prods)
+		cd_prods = reposadocommon.check_or_remove_config_data_attribute(check_prods, suppress_output=True)
 	else:
 		cd_prods = []
 
@@ -282,7 +282,7 @@ def remove_config_data(product):
 	# catalog_branches = reposadocommon.getCatalogBranches()
 	check_prods = request.json
 
-	products = reposadocommon.check_or_remove_config_data_attribute([product, ], remove_attr=True)
+	products = reposadocommon.check_or_remove_config_data_attribute([product, ], remove_attr=True, suppress_output=True)
 
 	return json_response(products)
 
