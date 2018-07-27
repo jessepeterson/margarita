@@ -1,0 +1,34 @@
+{
+    "security": {
+        "nameIdEncrypted": false,
+	      "wantAttributeStatement": false,
+        "authnRequestsSigned": false,
+        "logoutRequestSigned": false,
+        "logoutResponseSigned": false,
+        "signMetadata": false,
+        "wantMessagesSigned": false,
+        "wantAssertionsSigned": false,
+        "wantNameId" : true,
+        "wantNameIdEncrypted": false,
+        "wantAssertionsEncrypted": false,
+        "signatureAlgorithm": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+        "digestAlgorithm": "http://www.w3.org/2000/09/xmldsig#sha1"
+    },
+    "contactPerson": {
+        "technical": {
+            "givenName": "Harry Seeber",
+            "emailAddress": "harry.seeber@gusto.com"
+        },
+        "support": {
+            "givenName": "Gusto IT",
+            "emailAddress": "it@gusto.com"
+        }
+    },
+    "organization": {
+        "en-US": {
+            "name": "Gusto",
+            "displayname": "Gusto",
+            "url": "http://go.gustocorp.com"
+        }
+    }
+}
