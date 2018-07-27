@@ -1,0 +1,32 @@
+{
+    "strict": false,
+    "debug": true,
+    "sp": {
+        "entityId": "",
+        "assertionConsumerService": {
+            "url": "",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+        },
+        "singleLogoutService": {
+            "url": "",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+        "x509cert": "",
+        "privateKey": ""
+    },
+    "idp": {
+        "entityId": "",
+        "singleSignOnService": {
+            "url": "",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "singleLogoutService": {
+            "url": "",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "x509cert": "",
+        "certFinderprint": "",
+        "certFinderprintAlgorithim": ""
+    }
+}

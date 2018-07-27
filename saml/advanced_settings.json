@@ -16,19 +16,19 @@
     },
     "contactPerson": {
         "technical": {
-            "givenName": "Harry Seeber",
-            "emailAddress": "harry.seeber@gusto.com"
+            "givenName": "",
+            "emailAddress": ""
         },
         "support": {
-            "givenName": "Gusto IT",
-            "emailAddress": "it@gusto.com"
+            "givenName": "",
+            "emailAddress": ""
         }
     },
     "organization": {
         "en-US": {
-            "name": "Gusto",
-            "displayname": "Gusto",
-            "url": "http://go.gustocorp.com"
+            "name": "",
+            "displayname": "",
+            "url": ""
         }
     }
 }
