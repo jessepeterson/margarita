@@ -63,6 +63,7 @@ class SamlAuth(BaseAuth):
             else [e for e in exemptions if not e.startswith(self.path)]
         )
         self.exemptions.append(self.acs_path)
+	self.exemptions.append(self.acs_path.strip("/"))
         self.exemptions = set(self.exemptions)
         self.init_app(app)
 
@@ -85,6 +86,7 @@ class SamlAuth(BaseAuth):
         @app.route(self.acs_path, methods=["POST"])
         def acs_route():
             if not self.authenticated():
+		print 'begining authentication....'
                 r = self._prepare_flask_request(request)
                 # Here we shamelessly let someone else do the hard bit of
                 # decrypting, parsing, and validating the ACS statement
