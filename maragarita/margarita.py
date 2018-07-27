@@ -2,9 +2,9 @@
 from flask import Flask
 from flask import jsonify, render_template, redirect
 from flask import request, Response
-app = Flask(__name__)
-
+from .saml_auth import BaseAuth, SamlAuth
 import os, sys
+
 try:
 	import json
 except ImportError:
@@ -29,6 +29,36 @@ apple_catalog_version_map = {
 	'index-1.sucatalog': '10.4',
 	'index.sucatalog': '10.4',
 }
+
+BASE_AUTH_CLASS = BaseAuth
+
+def build_app():
+    app = Flask(__name__)
+
+    app.config.update(
+        {
+            "DEBUG": DEBUG,
+            "LOCAL_DEBUG": LOCAL_DEBUG,
+            "SECRET_KEY": os.environ.get("SECRET_KEY", "insecure"),
+            "SAML_PATH": os.environ.get(
+                "SAML_PATH",
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), "saml"),
+            ),
+            "SAML_AUTH_ENABLED": bool(os.environ.get("SAML_AUTH_ENABLED", False)),
+            "SQLALCHEMY_COMMIT_ON_TEARDOWN": True,
+            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+            "SAML_ADMIN_GROUPS": ("SG_Okta_GG_Admin",),
+        }
+    )
+
+    if app.config["SAML_AUTH_ENABLED"]:
+        auth = OktaAuth(app, auth_path="saml2", exemptions=["/<name>", "/test"])
+    else:
+        auth = BASE_AUTH_CLASS(app, is_admin=(lambda: LOCAL_DEBUG), is_auth=(lambda: True))
+
+    return app, auth
+
+app, auth = build_app()
 
 # cache the keys of the catalog version map dict
 apple_catalog_suffixes = apple_catalog_version_map.keys()
@@ -151,7 +181,7 @@ def new_branch(branchname):
         abort(401)
     catalog_branches[branchname] = []
     reposadocommon.writeCatalogBranches(catalog_branches)
-    
+
     return jsonify(result='success')
 
 @app.route('/delete_branch/<branchname>', methods=['POST'])
@@ -177,19 +207,19 @@ def delete_branch(branchname):
             os.remove(branchcatalogpath)
 
     reposadocommon.writeCatalogBranches(catalog_branches)
-    
+
     return jsonify(result=True);
 
 @app.route('/add_all/<branchname>', methods=['POST'])
 def add_all(branchname):
 	products = reposadocommon.getProductInfo()
 	catalog_branches = reposadocommon.getCatalogBranches()
-	
+
 	catalog_branches[branchname] = products.keys()
 
 	reposadocommon.writeCatalogBranches(catalog_branches)
 	reposadocommon.writeAllBranchCatalogs()
-	
+
 	return jsonify(result=True)
 
 
@@ -204,7 +234,7 @@ def process_queue():
 		if branch not in catalog_branches.keys():
 			print 'No such catalog'
 			continue
-		
+
 		if change['listed']:
 			# if this change /was/ listed, then unlist it
 			if prodId in catalog_branches[branch]:
@@ -295,7 +325,7 @@ def main():
 	flaskargs['host'] = '0.0.0.0'
 	flaskargs['port'] = 8089
 	flaskargs['threaded'] = True
-	
+
 	for o, a in optlist:
 		if o == '-d':
 			flaskargs['debug'] = True
@@ -303,7 +333,7 @@ def main():
 			flaskargs['host'] = a
 		elif o == '-p':
 			flaskargs['port'] = int(a)
-	
+
 	app.run(**flaskargs)
 
 if __name__ == '__main__':
