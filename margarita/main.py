@@ -52,7 +52,7 @@ def build_app():
     )
 
     if app.config["SAML_AUTH_ENABLED"]:
-        auth = OktaAuth(app, auth_path="saml2", exemptions=["/<name>", "/test"])
+        auth = SamlAuth(app, auth_path="saml2", exemptions=["/<name>", "/test"])
     else:
         auth = BASE_AUTH_CLASS(app, is_admin=(lambda: LOCAL_DEBUG), is_auth=(lambda: True))
 

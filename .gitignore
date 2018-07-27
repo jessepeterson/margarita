@@ -1,2 +1,4 @@
 preferences.plist
 reposadolib
+.pyc
+.venv
