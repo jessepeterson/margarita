@@ -37,8 +37,8 @@ def build_app():
 
     app.config.update(
         {
-            "DEBUG": DEBUG,
-            "LOCAL_DEBUG": LOCAL_DEBUG,
+            "DEBUG": os.environ.get('DEBUG', False),
+            "LOCAL_DEBUG": os.environ.get('LOCAL_DEBUG', False),
             "SECRET_KEY": os.environ.get("SECRET_KEY", "insecure"),
             "SAML_PATH": os.environ.get(
                 "SAML_PATH",
@@ -317,24 +317,3 @@ def remove_config_data(product):
 	products = reposadocommon.check_or_remove_config_data_attribute([product, ], remove_attr=True, suppress_output=True)
 
 	return json_response(products)
-
-def main():
-	optlist, args = getopt.getopt(sys.argv[1:], 'db:p:')
-
-	flaskargs = {}
-	flaskargs['host'] = '0.0.0.0'
-	flaskargs['port'] = 8089
-	flaskargs['threaded'] = True
-
-	for o, a in optlist:
-		if o == '-d':
-			flaskargs['debug'] = True
-		elif o == '-b':
-			flaskargs['host'] = a
-		elif o == '-p':
-			flaskargs['port'] = int(a)
-
-	app.run(**flaskargs)
-
-if __name__ == '__main__':
-    main()

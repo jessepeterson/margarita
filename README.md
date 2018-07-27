@@ -61,11 +61,11 @@ Usage
 
 Once the requirements and installation are taken care of one may simply launch the margarita.py script:
 
-    python margarita.py
+    python run.py runserver
 
 This will launch a Flask web server hosting the project. Visit the web page at the listened address, by default the host's IP address on port 8089. To change those defaults:
 
-    python margarita.py -p 5000 -b 192.168.1.2 -d
+    python run.py -p 5000 -b 192.168.1.2 -d
 
 Which would listen on port 5000, bind to IP 192.168.1.2 (by default it listens on all interfaces and IP addresses), and enable debug mode.
 
@@ -86,7 +86,7 @@ Margarita can be started automatically as part of launchd. Included is a launchd
 
 **Linux sysv startup**
 
-- [Linux/Mac – Have Margarita Startup Automatically On Boot](http://rileyshott.wordpress.com/2012/09/17/linuxmac-have-margarita-startup-automatically-on-boot/)
+- Use the provided margarita.service file. Requires gunicorn.
 
 Other web servers
 -----------------
