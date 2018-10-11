@@ -314,3 +314,7 @@ def remove_config_data(product):
 	products = reposadocommon.check_or_remove_config_data_attribute([product, ], remove_attr=True, suppress_output=True)
 
 	return json_response(products)
+
+@app.route('/status')
+def status():
+	return jsonify(state='calmer than you')
