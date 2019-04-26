@@ -6,7 +6,6 @@ services:
       - "443:443"
     volumes:
       - reposado:/reposado
-    command: python /reposado/code/repo_sync
 
   margarita:
     image: "margarita"
