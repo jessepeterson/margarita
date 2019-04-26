@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import jsonify, render_template, redirect
 from flask import request, Response
-from .saml_auth import BaseAuth, SamlAuth
+from saml_auth import BaseAuth, SamlAuth
 import os, sys
 
 try:

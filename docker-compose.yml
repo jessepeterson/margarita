@@ -1,10 +1,21 @@
 version: '3'
 services:
-  margarita:
-    build: .
-    ports:
-     - "8089:8089"
   reposado:
     image: "macadmins/reposado"
     ports:
-      - "80:80"
+      - "443:443"
+    volumes:
+      - reposado:/reposado
+    command: python /reposado/code/repo_sync
+
+  margarita:
+    image: "margarita"
+    ports:
+     - "80:80"
+    volumes:
+      - reposado:/reposado
+    depends_on:
+      - reposado
+
+volumes:
+  reposado:
