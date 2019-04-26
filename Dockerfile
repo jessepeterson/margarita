@@ -1,16 +1,12 @@
-FROM python:2.7-alpine
+FROM tiangolo/uwsgi-nginx-flask:python2.7
 
-RUN mkdir /app
 WORKDIR /app
 
-RUN apk add --update git && rm -rf /var/cache/apk/*
-
 COPY requirements.txt /app
+COPY margarita /app
+COPY saml /app
+
+RUN apt-get update -y && apt-get upgrade -y && apt-get -y install libxmlsec1-dev
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN git clone --depth 1 https://github.com/wdas/reposado && \
-    cp -R reposado/code/reposadolib reposadolib && \
-    rm -rf reposado
-
-COPY . /app
-CMD python margarita.py -p 5000
+EXPOSE 8089

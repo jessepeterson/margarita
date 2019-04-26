@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 
 import os, sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-sys.path = list(set([p for p in sys.path if p]))
+import margarita
 
-from margarita.main import app
-from flask_script import Manager, Server
-
-server = Server(host='127.0.0.1', port=8000) if os.environ.get('LOCAL_DEBUG') else \
-    Server('0.0.0.0', port=80)
-manager = Manager(app)
-manager.add_command('runserver', server)
+def main():
+    if os.environ.get('MARGARITA_ENV') == 'DEVELOPMENT' or \
+    'runserver' in sys.argv:
+        from flask_script import Manager, Server
+        manager = Manager(margarita.app)
+        manager.add_command(
+        'runserver',
+        Server(
+            host='0.0.0.0',
+            port=int(os.environ.get('MARGARITA_PORT', 80)))
+            )
+        manager.run()
+    else:
+        margarita.app.run()
 
 if __name__ == '__main__':
-    manager.run()
+    main()
