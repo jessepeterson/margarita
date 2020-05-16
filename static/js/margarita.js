@@ -138,11 +138,19 @@ var FilterCriteria = Backbone.Model.extend({
 	productFilter: function(product) {
 		var show = false;
 
-		if (this.get('hideCommon') == false || product.get('depr') == true) {
-			// always show the update if not hiding common updates OR if the update is deprecated
+		if (this.get('hideCommon') == false) {
+			// always show the update if not hiding common updates
 			show = true;
+		} else if (this.get('hideCommon') == true && product.get('depr') == true) {
+			// if the product is deprecated but still in a branch, show it when hiding common updates
+                        if (product.get('branches').length > 0){
+				show = true;
+			} else {
+				// don't show deprecated updates if hiding common updates and it's not in a branch
+				show = false;
+			}
 		} else {
-			var proddiff = _.difference(product.allBranches, product.get('branches'))
+			var proddiff = _.difference(product.allBranches, product.get('branches'));
 
 			// if we're not listed in all branches then show the update
 			if (proddiff.length != 0)  show = true;
